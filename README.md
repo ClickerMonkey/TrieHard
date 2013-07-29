@@ -52,4 +52,4 @@ public interface TrieSequencer<S>
 
 ### TODO
 
-Document entire library, write tests that cover 100% of code.
+* Documentation
