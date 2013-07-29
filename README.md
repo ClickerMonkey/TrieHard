@@ -54,3 +54,27 @@ public interface TrieSequencer<S>
    public S combine(S sequenceA, S sequenceB);
 }
 ```
+
+### How can I use it as an X?
+
+#### Auto-Complete
+
+```java
+Trie<String, Integer> t = Trie.forInsensitiveStrings();
+// Add all available values to the Trie
+t.put( "world", 23 );
+t.put( "worm", 45 );
+t.put( "worry", 76 );
+t.put( "why", -89 );
+t.put( "women", 123 );
+...
+// Given user input, what are possible values?
+String userInput = "wo";
+Map<String, Integer> possible = t.takeValues( userInput, TrieMatch.PARTIAL, 
+                                              new HashMap<String, Integer>() );
+// possible = { world=>23, worm=>45, worry=>76, women=>123 }
+...
+// Use possible to display full keys and their values.
+```
+
+#### To see other use cases, request one!

@@ -6,3 +6,4 @@ doc/
 *.o
 *.gch
 *.sublime-workspace
+.README.md.html
