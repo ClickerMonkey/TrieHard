@@ -30,6 +30,8 @@ public class Trie<S, T>
 
    private TrieSequencer<S> sequencer;
    private TrieNode root;
+   private TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
+   private int size;
 
    public Trie( TrieSequencer<S> sequencer )
    {
@@ -82,7 +84,8 @@ public class Trie<S, T>
          if (max < nodeLength)
          {
             node.split( max, value );
-
+            size++;
+            
             return null;
          }
 
@@ -124,6 +127,8 @@ public class Trie<S, T>
    {
       node.add( new TrieNode( node, value, sequencer.subSequence( query, queryOffset, queryLength ), queryOffset, null ) );
 
+      size++;
+
       return null;
    }
 
@@ -133,10 +138,20 @@ public class Trie<S, T>
 
       return (n != null ? n.value : root.value);
    }
+   
+   public T get( S sequence )
+   {
+      return get( sequence, defaultMatch );
+   }
 
    public boolean has( S sequence, TrieMatch match )
    {
       return (search( sequence, match ) != null);
+   }
+   
+   public boolean has( S sequence )
+   {
+      return has( sequence, defaultMatch );
    }
 
    public boolean remove( S sequence )
@@ -148,6 +163,8 @@ public class Trie<S, T>
          return false;
       }
 
+      size--;
+
       n.remove();
 
       return true;
@@ -156,6 +173,12 @@ public class Trie<S, T>
    private TrieNode search( S query, TrieMatch match )
    {
       final int queryLength = sequencer.lengthOf( query );
+      
+      if (queryLength == 0 || match == null)
+      {
+         return null;
+      }
+      
       int queryOffset = 0;
       TrieNode node = root.children.get( sequencer.hashOf( query, 0 ) );
 
@@ -168,12 +191,18 @@ public class Trie<S, T>
 
          queryOffset += matches;
 
-         // Potentially PARTIAL match or not found
+         // Not found
          if (matches != max)
          {
-            return (match != TrieMatch.PARTIAL || queryOffset != queryLength ? null : node);
+            return null;
          }
 
+         // Potentially PARTIAL match
+         if ( max != nodeLength && matches == max )
+         {
+            return (match != TrieMatch.PARTIAL ? null : node);
+         }
+         
          // Either EXACT or STARTS_WITH match
          if (queryOffset == queryLength || node.children == null)
          {
@@ -238,6 +267,26 @@ public class Trie<S, T>
       root.iterator( 0, iterator );
    }
 
+   public int size()
+   {
+      return size;
+   }
+
+   public boolean isEmpty()
+   {
+      return (size == 0);
+   }
+   
+   public TrieMatch getDefaultMatch()
+   {
+      return defaultMatch;
+   }
+   
+   public void setDefaultMatch(TrieMatch match)
+   {
+      defaultMatch = match;
+   }
+
    private class TrieNode
    {
 
@@ -289,7 +338,9 @@ public class Trie<S, T>
       {
          value = null;
 
-         if (children.size() == 0)
+         int childCount = (children == null ? 0 : children.size());
+         
+         if (childCount == 0)
          {
             parent.children.remove( sequencer.hashOf( sequence, 0 ) );
 
@@ -297,6 +348,19 @@ public class Trie<S, T>
             {
                parent.remove();
             }
+         }
+         else if (childCount == 1)
+         {
+            TrieNode child = children.valueAt( 0 );
+            
+            children = child.children;
+            value = child.value;
+            sequence = sequencer.combine( sequence, child.sequence );
+            
+            child.children = null;
+            child.parent = null;
+            child.sequence = null;
+            child.value = null;
          }
       }
 
@@ -375,7 +439,7 @@ public class Trie<S, T>
          {
             return;
          }
-         
+
          for (int i = 0; i < children.capacity(); i++)
          {
             TrieNode c = children.valueAt( i );

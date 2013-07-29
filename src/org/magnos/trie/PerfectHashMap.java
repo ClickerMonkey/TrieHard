@@ -122,22 +122,24 @@ public class PerfectHashMap<T>
 
       if (i == 0)
       {
-         while (i <= valuesMax && values[i] == null)
+         do 
          {
-            i++;
+            i++;   
          }
+         while (i <= valuesMax && values[i] == null);
          
          values = Arrays.copyOfRange( values, i, values.length );
          min += i;
       }
       else if (i == valuesMax)
       {
-         while (i >= 0 && values[i] == null)
+         do
          {
             i--;
          }
+         while (i > 0 && values[i] == null);
          
-         values = Arrays.copyOf( values, i );
+         values = Arrays.copyOf( values, i + 1 );
       }
       else
       {
@@ -148,6 +150,8 @@ public class PerfectHashMap<T>
          
          values[i] = null;
       }
+      
+      size--;
       
       return true;
    }
@@ -164,7 +168,12 @@ public class PerfectHashMap<T>
    
    public int getMax()
    {
-      return min + values.length;
+      return min + values.length - 1;
+   }
+   
+   public boolean isEmpty()
+   {
+      return (size == 0);
    }
    
    public int size()
