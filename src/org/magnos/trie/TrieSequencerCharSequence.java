@@ -19,6 +19,13 @@ package org.magnos.trie;
 import java.nio.CharBuffer;
 
 
+/**
+ * A {@link TrieSequencer} implementation where any subclass of CharSequence
+ * (i.e. String) is the sequence type. This implementation is case-sensitive.
+ * 
+ * @author Philip Diffenderfer
+ * 
+ */
 public class TrieSequencerCharSequence<S extends CharSequence> implements TrieSequencer<S>
 {
 
@@ -81,7 +88,7 @@ public class TrieSequencerCharSequence<S extends CharSequence> implements TrieSe
       {
          return (S)CharBuffer.wrap( combined );
       }
-      
+
       return null;
    }
 

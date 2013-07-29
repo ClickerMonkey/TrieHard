@@ -17,32 +17,36 @@
 package org.magnos.trie;
 
 /**
- * A simple iterator for traversing the entries in a Trie. A node has a
- * sequence, an index in the overall sequence, a value, and a depth in the
- * Trie.
+ * A {@link TrieSequencer} implementation where any subclass of CharSequence
+ * (i.e. String) is the sequence type. This implementation is case-insensitive.
  * 
  * @author Philip Diffenderfer
  * 
- * @param <S>
- *        The sequence/key type.
- * @param <T>
- *        The value type.
  */
-public interface TrieIterator<S, T>
+public class TrieSequencerCharSequenceCaseInsensitive<S extends CharSequence> extends TrieSequencerCharSequence<S>
 {
 
-   /**
-    * A method invoked for each entry in a Trie.
-    * 
-    * @param sequence
-    *        The sequence for the current entry.
-    * @param index
-    *        The index of the sequence in it's overall sequence.
-    * @param value
-    *        The value for the current entry.
-    * @param depth
-    *        The depth of the entry in the Trie.
-    */
-   public void onEntry( S sequence, int index, T value, int depth );
+   @Override
+   public int matches( S sequenceA, int indexA, S sequenceB, int indexB, int count )
+   {
+      for (int i = 0; i < count; i++)
+      {
+         char a = sequenceA.charAt( indexA + i );
+         char b = sequenceB.charAt( indexB + i );
+
+         if (Character.toLowerCase( a ) != Character.toLowerCase( b ))
+         {
+            return i;
+         }
+      }
+
+      return count;
+   }
+
+   @Override
+   public int hashOf( S sequence, int i )
+   {
+      return Character.toLowerCase( sequence.charAt( i ) );
+   }
 
 }

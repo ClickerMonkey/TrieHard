@@ -18,6 +18,7 @@ package org.magnos.trie;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -211,6 +212,26 @@ public class TestTrie
       assertTrue( values.contains( "UTIL" ) );
       assertTrue( values.contains( "BOOLEAN" ) );
    }
+   
+   @Test
+   public void testTakeValuesSubset()
+   {
+      Trie<String, String> t = Trie.forStrings();
+
+      t.put( "java.lang.", "LANG" );
+      t.put( "java.io.", "IO" );
+      t.put( "java.util.concurrent.", "CONCURRENT" );
+      t.put( "java.util.", "UTIL" );
+      t.put( "java.lang.Boolean", "BOOLEAN" );
+      
+      assertEquals( 5, t.size() );
+
+      Set<String> values = t.takeValues( "java.u", TrieMatch.PARTIAL, new HashSet<String>() );
+
+      assertEquals( 2, values.size() );
+      assertTrue( values.contains( "CONCURRENT" ) );
+      assertTrue( values.contains( "UTIL" ) );
+   }
 
    @Test
    public void testTakeSequences()
@@ -234,6 +255,26 @@ public class TestTrie
       assertTrue( values.contains( "java.util.concurrent." ) );
       assertTrue( values.contains( "java.util." ) );
       assertTrue( values.contains( "java.lang.Boolean" ) );
+   }
+
+   @Test
+   public void testTakeSequencesSubset()
+   {
+      Trie<String, String> t = Trie.forStrings();
+
+      t.put( "java.lang.", "LANG" );
+      t.put( "java.io.", "IO" );
+      t.put( "java.util.concurrent.", "CONCURRENT" );
+      t.put( "java.util.", "UTIL" );
+      t.put( "java.lang.Boolean", "BOOLEAN" );
+
+      assertEquals( 5, t.size() );
+
+      Set<String> values = t.takeSequences( "java.u", TrieMatch.PARTIAL, new HashSet<String>() );
+
+      assertEquals( 2, values.size() );
+      assertTrue( values.contains( "java.util.concurrent." ) );
+      assertTrue( values.contains( "java.util." ) );
    }
 
    @Test
@@ -261,6 +302,27 @@ public class TestTrie
    }
 
    @Test
+   public void testTakeEntriesSubset()
+   {
+      Trie<String, Boolean> t = Trie.forStrings();
+
+      t.put( "java.lang.", Boolean.TRUE );
+      t.put( "java.io.", Boolean.TRUE );
+      t.put( "java.util.concurrent.", Boolean.TRUE );
+      t.put( "java.util.", Boolean.FALSE );
+      t.put( "java.lang.Boolean", Boolean.FALSE );
+
+      assertEquals( 5, t.size() );
+
+      Map<String, Boolean> map = t.takeEntries( "java.u", TrieMatch.PARTIAL, new HashMap<String, Boolean>() );
+
+      assertEquals( 2, map.size() );
+
+      assertEquals( Boolean.TRUE, map.get( "java.util.concurrent." ) );
+      assertEquals( Boolean.FALSE, map.get( "java.util." ) );
+   }
+
+   @Test
    public void testRemoveBack()
    {
       Trie<String, Integer> t = Trie.forStrings();
@@ -272,8 +334,11 @@ public class TestTrie
       assertEquals( 0, t.get( "hello" ).intValue() );
       assertEquals( 1, t.get( "hello world" ).intValue() );
 
-      t.remove( "hello world" );
+      Integer r1 = t.remove( "hello world" );
 
+      assertNotNull( r1 );
+      assertEquals( 1, r1.intValue() );
+      
       assertEquals( 1, t.size() );
       assertEquals( 0, t.get( "hello" ).intValue() );
       assertEquals( 0, t.get( "hello world" ).intValue() );
@@ -291,8 +356,11 @@ public class TestTrie
       assertEquals( 0, t.get( "hello" ).intValue() );
       assertEquals( 1, t.get( "hello world" ).intValue() );
 
-      t.remove( "hello" );
+      Integer r0 = t.remove( "hello" );
 
+      assertNotNull( r0 );
+      assertEquals( 0, r0.intValue() );
+      
       assertEquals( 1, t.size() );
       assertEquals( 1, t.get( "hello", TrieMatch.PARTIAL ).intValue() );
       assertEquals( 1, t.get( "hello world" ).intValue() );
@@ -312,8 +380,11 @@ public class TestTrie
       assertEquals( 1, t.get( "hello world" ).intValue() );
       assertEquals( 2, t.get( "hello, clarice" ).intValue() );
 
-      t.remove( "hello" );
+      Integer r0 = t.remove( "hello" );
 
+      assertNotNull( r0 );
+      assertEquals( 0, r0.intValue() );
+      
       assertEquals( 2, t.size() );
       assertNull( t.get( "hello", TrieMatch.PARTIAL ) );
       assertEquals( 1, t.get( "hello world" ).intValue() );

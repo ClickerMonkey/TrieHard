@@ -20,27 +20,119 @@ import java.util.Collection;
 import java.util.Map;
 
 
+/**
+ * An implementation of a compact Trie. <br/>
+ * <br/>
+ * <i>From Wikipedia:</i> <br/>
+ * <br/>
+ * <code>
+ * an ordered tree data structure that is used to store a dynamic set or associative array where the keys are usually strings. Unlike a binary search tree, no node in the tree stores the key associated with that node; instead, its position in the tree defines the key with which it is associated. All the descendants of a node have a common prefix of the string associated with that node, and the root is associated with the empty string. Values are normally not associated with every node, only with leaves and some inner nodes that correspond to keys of interest. For the space-optimized presentation of prefix tree, see compact prefix tree.
+ * </code> <br/>
+ * 
+ * @author Philip Diffenderfer
+ * 
+ * @param <S>
+ *        The sequence/key type.
+ * @param <T>
+ *        The value type.
+ */
 public class Trie<S, T>
 {
 
+   /**
+    * Creates a Trie where the keys are case-sensitive Strings.
+    * 
+    * @return The reference to a newly instantiated Trie.
+    */
    public static <T> Trie<String, T> forStrings()
    {
       return new Trie<String, T>( new TrieSequencerCharSequence<String>() );
    }
 
+   /**
+    * Creates a Trie where the keys are case-sensitive Strings.
+    * 
+    * @param defaultValue
+    *        The default value of the Trie is the value returned when
+    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        and no match was found.
+    * @return The reference to a newly instantiated Trie.
+    */
    public static <T> Trie<String, T> forStrings( T defaultValue )
    {
       return new Trie<String, T>( new TrieSequencerCharSequence<String>(), defaultValue );
    }
 
+   /**
+    * Creates a Trie where the keys are case-insensitive Strings.
+    * 
+    * @return The reference to a newly instantiated Trie.
+    */
+   public static <T> Trie<String, T> forInensitiveStrings()
+   {
+      return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>() );
+   }
+
+   /**
+    * Creates a Trie where the keys are case-insensitive Strings.
+    * 
+    * @param defaultValue
+    *        The default value of the Trie is the value returned when
+    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        and no match was found.
+    * @return The reference to a newly instantiated Trie.
+    */
+   public static <T> Trie<String, T> forInsensitiveStrings( T defaultValue )
+   {
+      return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>(), defaultValue );
+   }
+
+   /**
+    * Creates a Trie where the keys are case-sensitive character arrays.
+    * 
+    * @return The reference to a newly instantiated Trie.
+    */
    public static <T> Trie<char[], T> forChars()
    {
       return new Trie<char[], T>( new TrieSequencerCharArray() );
    }
 
+   /**
+    * Creates a Trie where the keys are case-sensitive character arrays.
+    * 
+    * @param defaultValue
+    *        The default value of the Trie is the value returned when
+    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        and no match was found.
+    * @return The reference to a newly instantiated Trie.
+    */
    public static <T> Trie<char[], T> forChars( T defaultValue )
    {
       return new Trie<char[], T>( new TrieSequencerCharArray(), defaultValue );
+   }
+
+   /**
+    * Creates a Trie where the keys are case-insensitive character arrays.
+    * 
+    * @return The reference to a newly instantiated Trie.
+    */
+   public static <T> Trie<char[], T> forInsensitiveChars()
+   {
+      return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive() );
+   }
+
+   /**
+    * Creates a Trie where the keys are case-insensitive character arrays.
+    * 
+    * @param defaultValue
+    *        The default value of the Trie is the value returned when
+    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        and no match was found.
+    * @return The reference to a newly instantiated Trie.
+    */
+   public static <T> Trie<char[], T> forInsensitiveChars( T defaultValue )
+   {
+      return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive(), defaultValue );
    }
 
    private TrieSequencer<S> sequencer;
@@ -48,17 +140,44 @@ public class Trie<S, T>
    private TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
    private int size;
 
+   /**
+    * Instantiates a new Trie.
+    * 
+    * @param sequencer
+    *        The TrieSequencer which handles the necessary sequence operations.
+    */
    public Trie( TrieSequencer<S> sequencer )
    {
       this( sequencer, null );
    }
 
+   /**
+    * Instantiates a new Trie.
+    * 
+    * @param sequencer
+    *        The TrieSequencer which handles the necessary sequence operations.
+    * @param defaultValue
+    *        The default value of the Trie is the value returned when
+    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        and no match was found.
+    */
    public Trie( TrieSequencer<S> sequencer, T defaultValue )
    {
       this.root = new TrieNode( null, defaultValue, null, 0, new PerfectHashMap<TrieNode>() );
       this.sequencer = sequencer;
    }
 
+   /**
+    * Puts the value in the Trie with the given sequence.
+    * 
+    * @param query
+    *        The sequence.
+    * @param value
+    *        The value to place in the Trie.
+    * @return
+    *         The previous value in the Trie with the same sequence if one
+    *         existed, otherwise null.
+    */
    public T put( S query, T value )
    {
       final int queryLength = sequencer.lengthOf( query );
@@ -100,7 +219,7 @@ public class Trie<S, T>
          {
             node.split( max, value );
             size++;
-            
+
             return null;
          }
 
@@ -138,6 +257,22 @@ public class Trie<S, T>
       return null;
    }
 
+   /**
+    * Adds a new TrieNode to the given node with the given sequence subset.
+    * 
+    * @param node
+    *        The node to add to; the parent of the created node.
+    * @param value
+    *        The value of the node.
+    * @param query
+    *        The sequence that was put.
+    * @param queryOffset
+    *        The offset into that sequence where the node (subset sequence)
+    *        should begin.
+    * @param queryLength
+    *        The length of the subset sequence in elements.
+    * @return null
+    */
    private T putReturnNull( TrieNode node, T value, S query, int queryOffset, int queryLength )
    {
       node.add( new TrieNode( node, value, sequencer.subSequence( query, queryOffset, queryLength ), queryOffset, null ) );
@@ -147,53 +282,113 @@ public class Trie<S, T>
       return null;
    }
 
+   /**
+    * Gets the value that matches the given sequence.
+    * 
+    * @param sequence
+    *        The sequence to match.
+    * @param match
+    *        The matching logic to use.
+    * @return The value for the given sequence, or the default value of the Trie
+    *         if no match was found. The default value of a Trie is by default
+    *         null.
+    * 
+    */
    public T get( S sequence, TrieMatch match )
    {
       TrieNode n = search( sequence, match );
 
       return (n != null ? n.value : root.value);
    }
-   
+
+   /**
+    * Gets the value that matches the given sequence using the default
+    * TrieMatch.
+    * 
+    * @param sequence
+    *        The sequence to match.
+    * @return The value for the given sequence, or the default value of the Trie
+    *         if no match was found. The default value of a Trie is by default
+    *         null.
+    */
    public T get( S sequence )
    {
       return get( sequence, defaultMatch );
    }
 
+   /**
+    * Determines whether a value exists for the given sequence.
+    * 
+    * @param sequence
+    *        The sequence to match.
+    * @param match
+    *        The matching logic to use.
+    * @return True if a value exists for the given sequence, otherwise false.
+    */
    public boolean has( S sequence, TrieMatch match )
    {
       return (search( sequence, match ) != null);
    }
-   
+
+   /**
+    * Determines whether a value exists for the given sequence using the default
+    * TrieMatch.
+    * 
+    * @param sequence
+    *        The sequence to match.
+    * @return True if a value exists for the given sequence, otherwise false.
+    */
    public boolean has( S sequence )
    {
       return has( sequence, defaultMatch );
    }
 
-   public boolean remove( S sequence )
+   /**
+    * Removes the sequence from the Trie and returns it's value. The sequence
+    * must be an exact match, otherwise nothing will be removed.
+    * 
+    * @param sequence
+    *        The sequence to remove.
+    * @return The value of the removed sequence, or null if no sequence was
+    *         removed.
+    */
+   public T remove( S sequence )
    {
       TrieNode n = search( sequence, TrieMatch.EXACT );
 
       if (n == null)
       {
-         return false;
+         return null;
       }
 
       size--;
 
+      T value = n.value;
+
       n.remove();
 
-      return true;
+      return value;
    }
 
+   /**
+    * Searches in the Trie based on the sequence query and the matching logic.
+    * 
+    * @param query
+    *        The query sequence.
+    * @param match
+    *        The matching logic.
+    * @return The node that best matched the query based on the logic.
+    */
    private TrieNode search( S query, TrieMatch match )
    {
       final int queryLength = sequencer.lengthOf( query );
-      
+
+      // If the query is empty or matching logic is not given, return null.
       if (queryLength == 0 || match == null)
       {
          return null;
       }
-      
+
       int queryOffset = 0;
       TrieNode node = root.children.get( sequencer.hashOf( query, 0 ) );
 
@@ -213,11 +408,11 @@ public class Trie<S, T>
          }
 
          // Potentially PARTIAL match
-         if ( max != nodeLength && matches == max )
+         if (max != nodeLength && matches == max)
          {
             return (match != TrieMatch.PARTIAL ? null : node);
          }
-         
+
          // Either EXACT or STARTS_WITH match
          if (queryOffset == queryLength || node.children == null)
          {
@@ -256,6 +451,14 @@ public class Trie<S, T>
       return node;
    }
 
+   /**
+    * Takes all values that exist in this Trie and add them to the given
+    * destination collection.
+    * 
+    * @param destination
+    *        The collection to add all values to.
+    * @return The reference to the given collection.
+    */
    public <C extends Collection<T>> C takeValues( C destination )
    {
       root.takeValues( destination );
@@ -263,6 +466,38 @@ public class Trie<S, T>
       return destination;
    }
 
+   /**
+    * Takes all values that match the given sequence query and add them to the
+    * given destination collection.
+    * 
+    * @param query
+    *        The sequence to query the Trie.
+    * @param match
+    *        The matching logic.
+    * @param destination
+    *        The collection to add all matched values to.
+    * @return The reference to the given collection.
+    */
+   public <C extends Collection<T>> C takeValues( S query, TrieMatch match, C destination )
+   {
+      TrieNode n = search( query, match );
+
+      if (n != null)
+      {
+         n.takeValues( destination );
+      }
+
+      return destination;
+   }
+
+   /**
+    * Takes all sequences that exist in this Trie and add them to the given
+    * destination collection.
+    * 
+    * @param destination
+    *        The collection to add all sequences to.
+    * @return The reference to the given collection.
+    */
    public <C extends Collection<S>> C takeSequences( C destination )
    {
       root.takeSequences( null, destination );
@@ -270,6 +505,52 @@ public class Trie<S, T>
       return destination;
    }
 
+   /**
+    * Takes all sequences that match the given sequence query and add them to
+    * the given destination collection.
+    * 
+    * @param query
+    *        The sequence to query the Trie.
+    * @param match
+    *        The matching logic.
+    * @param destination
+    *        The collection to add all matched sequences to.
+    * @return The reference to the given collection.
+    */
+   public <C extends Collection<S>> C takeSequences( S query, TrieMatch match, C destination )
+   {
+      TrieNode n = search( query, match );
+
+      if (n != null)
+      {
+         S parentSequence = null;
+
+         if (n.parent != null)
+         {
+            TrieNode p = n.parent;
+            parentSequence = p.sequence;
+
+            while (p.parent != null && p.parent.sequence != null)
+            {
+               parentSequence = sequencer.combine( p.parent.sequence, parentSequence );
+               p = p.parent;
+            }
+         }
+
+         n.takeSequences( parentSequence, destination );
+      }
+
+      return destination;
+   }
+
+   /**
+    * Takes all entries that exist in this Trie and add them to the given
+    * destination Map.
+    * 
+    * @param destination
+    *        The Map to add all entries to.
+    * @return The reference to the given Map.
+    */
    public <M extends Map<S, T>> M takeEntries( M destination )
    {
       root.takeEntries( null, destination );
@@ -277,31 +558,105 @@ public class Trie<S, T>
       return destination;
    }
 
+   /**
+    * Takes all entries that match the given sequence query and add them to
+    * the given destination Map.
+    * 
+    * @param query
+    *        The sequence to query the Trie.
+    * @param match
+    *        The matching logic.
+    * @param destination
+    *        The Map to put all matched entries to.
+    * @return The reference to the given Map.
+    */
+   public <M extends Map<S, T>> M takeEntries( S query, TrieMatch match, M destination )
+   {
+      TrieNode n = search( query, match );
+
+      if (n != null)
+      {
+         S parentSequence = null;
+
+         if (n.parent != null)
+         {
+            TrieNode p = n.parent;
+            parentSequence = p.sequence;
+
+            while (p.parent != null && p.parent.sequence != null)
+            {
+               parentSequence = sequencer.combine( p.parent.sequence, parentSequence );
+               p = p.parent;
+            }
+         }
+
+         n.takeEntries( parentSequence, destination );
+      }
+
+      return destination;
+   }
+
+   /**
+    * Iterates over all entries in this Trie.
+    * 
+    * @param iterator
+    *        The iterator to invoke for each entry.
+    */
    public void iterator( TrieIterator<S, T> iterator )
    {
       root.iterator( 0, iterator );
    }
 
+   /**
+    * Returns the number of sequences-value pairs in this Trie.
+    * 
+    * @return The number of sequences-value pairs in this Trie.
+    */
    public int size()
    {
       return size;
    }
 
+   /**
+    * Determines whether this Trie is empty.
+    * 
+    * @return 0 if the Trie doesn't have any sequences-value pairs, otherwise
+    *         false.
+    */
    public boolean isEmpty()
    {
       return (size == 0);
    }
-   
+
+   /**
+    * Returns the default TrieMatch used for {@link #has(Object)} and
+    * {@link #get(Object)}.
+    * 
+    * @return The default TrieMatch set on this Trie.
+    */
    public TrieMatch getDefaultMatch()
    {
       return defaultMatch;
    }
-   
-   public void setDefaultMatch(TrieMatch match)
+
+   /**
+    * Sets the default TrieMatch used for {@link #has(Object)} and
+    * {@link #get(Object)}.
+    * 
+    * @param match
+    *        The new default TrieMatch to set on this Trie.
+    */
+   public void setDefaultMatch( TrieMatch match )
    {
       defaultMatch = match;
    }
 
+   /**
+    * The internal entry class that stores sequences and values.
+    * 
+    * @author Philip Diffenderfer
+    *
+    */
    private class TrieNode
    {
 
@@ -354,7 +709,7 @@ public class Trie<S, T>
          value = null;
 
          int childCount = (children == null ? 0 : children.size());
-         
+
          if (childCount == 0)
          {
             parent.children.remove( sequencer.hashOf( sequence, 0 ) );
@@ -367,11 +722,11 @@ public class Trie<S, T>
          else if (childCount == 1)
          {
             TrieNode child = children.valueAt( 0 );
-            
+
             children = child.children;
             value = child.value;
             sequence = sequencer.combine( sequence, child.sequence );
-            
+
             child.children = null;
             child.parent = null;
             child.sequence = null;

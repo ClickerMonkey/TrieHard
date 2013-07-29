@@ -16,11 +16,88 @@
 
 package org.magnos.trie;
 
-public interface TrieSequencer<S> 
+/**
+ * A TrieSequencer enables a Trie to use keys of type S. A sequence is a
+ * linear set of elements.
+ * 
+ * @author Philip Diffenderfer
+ * 
+ * @param <S>
+ *        The sequence type.
+ */
+public interface TrieSequencer<S>
 {
-   public int matches(S sequenceA, int indexA, S sequenceB, int indexB, int count);
-   public int lengthOf(S sequence);
-   public int hashOf(S sequence, int index);
-   public S subSequence(S sequence, int start, int end);
-   public S combine(S sequenceA, S sequenceB);
+
+   /**
+    * Determines the maximum number of elements that match between sequences A
+    * and B where comparison starts at the given indices up to the given count.
+    * 
+    * @param sequenceA
+    *        The first sequence to count matches on.
+    * @param indexA
+    *        The offset into the first sequence.
+    * @param sequenceB
+    *        The second sequence to count matches on.
+    * @param indexB
+    *        The offset into the second sequence.
+    * @param count
+    *        The maximum number of matches to search for.
+    * @return A number between 0 (inclusive) and count (inclusive) that is the
+    *         number of matches between the two sequence sections.
+    */
+   public int matches( S sequenceA, int indexA, S sequenceB, int indexB, int count );
+
+   /**
+    * Calculates the length (number of elements) of the given sequence.
+    * 
+    * @param sequence
+    *        The sequence to measure.
+    * @return
+    *         The length of the given sequence.
+    */
+   public int lengthOf( S sequence );
+
+   /**
+    * Calculates the hash of the element at the given index in the given
+    * sequence. The hash is used as a key for the {@link PerfectHashMap} used
+    * internally in a Trie to quickly retrieve entries. Typical implementations
+    * based on characters return the ASCII value of the character, since it
+    * yields dense numerical values. The more dense the hashes returned (the
+    * smaller the difference between the minimum and maximum returnable hash
+    * means it's more dense), the less space that is wasted.
+    * 
+    * @param sequence
+    *        The sequence.
+    * @param index
+    *        The index of the element to calculate the hash of.
+    * @return
+    *         The hash of the element in the sequence at the index.
+    */
+   public int hashOf( S sequence, int index );
+
+   /**
+    * Returns a sequence that is a subset of a given sequence given a starting
+    * index (inclusive) and ending index (exclusive).
+    * 
+    * @param sequence
+    *        The sequence to take the subset of.
+    * @param start
+    *        The index at which the subset starts (inclusive).
+    * @param end
+    *        The index at which the subset ends (exclusive).
+    * @return The subset created.
+    */
+   public S subSequence( S sequence, int start, int end );
+
+   /**
+    * Combines two sequences into one.
+    * 
+    * @param sequenceA
+    *        The first sequence to combine.
+    * @param sequenceB
+    *        The second sequence to combine.
+    * @return A sequence that starts with the first and ends with the second.
+    */
+   public S combine( S sequenceA, S sequenceB );
+
 }

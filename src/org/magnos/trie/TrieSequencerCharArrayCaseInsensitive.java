@@ -16,17 +16,16 @@
 
 package org.magnos.trie;
 
-import java.util.Arrays;
 
 
 /**
  * A {@link TrieSequencer} implementation where char[] is the sequence type.
- * This implementation is case-sensitive.
+ * This implementation is case-insensitive.
  * 
  * @author Philip Diffenderfer
  * 
  */
-public class TrieSequencerCharArray implements TrieSequencer<char[]>
+public class TrieSequencerCharArrayCaseInsensitive extends TrieSequencerCharArray
 {
 
    @Override
@@ -34,7 +33,10 @@ public class TrieSequencerCharArray implements TrieSequencer<char[]>
    {
       for (int i = 0; i < count; i++)
       {
-         if (sequenceA[indexA + i] != sequenceB[indexB + i])
+         char a = sequenceA[indexA + i];
+         char b = sequenceB[indexB + i];
+
+         if (Character.toLowerCase( a ) != Character.toLowerCase( b ))
          {
             return i;
          }
@@ -44,32 +46,9 @@ public class TrieSequencerCharArray implements TrieSequencer<char[]>
    }
 
    @Override
-   public int lengthOf( char[] sequence )
-   {
-      return sequence.length;
-   }
-
-   @Override
    public int hashOf( char[] sequence, int i )
    {
-      return sequence[i];
-   }
-
-   @Override
-   public char[] subSequence( char[] sequence, int start, int end )
-   {
-      return Arrays.copyOfRange( sequence, start, end );
-   }
-
-   @Override
-   public char[] combine( char[] sequenceA, char[] sequenceB )
-   {
-      char[] combined = new char[sequenceA.length + sequenceB.length];
-
-      System.arraycopy( sequenceA, 0, combined, 0, sequenceA.length );
-      System.arraycopy( sequenceB, 0, combined, sequenceA.length, sequenceB.length );
-
-      return combined;
+      return Character.toLowerCase( sequence[i] );
    }
 
 }

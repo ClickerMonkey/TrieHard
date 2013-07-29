@@ -17,23 +17,28 @@ t.put( "java.util.concurrent.", Boolean.TRUE );
 t.put( "java.util.", Boolean.FALSE );
 t.put( "java.lang.Boolean", Boolean.FALSE );
 
-assertTrue(  t.get( "java.lang.Integer", TrieMatch.STARTS_WITH ) );
-assertTrue(  t.get( "java.lang.Long", TrieMatch.STARTS_WITH ) );
-assertFalse( t.get( "java.lang.Boolean", TrieMatch.STARTS_WITH ) );
-assertTrue(  t.get( "java.io.InputStream", TrieMatch.STARTS_WITH ) );
-assertFalse( t.get( "java.util.ArrayList", TrieMatch.STARTS_WITH ) );
-assertTrue(  t.get( "java.util.concurrent.ConcurrentHashMap", TrieMatch.STARTS_WITH ) );
+assertTrue( t.get( "java.lang.Integer" ) );
+assertTrue( t.get( "java.lang.Long" ) );
+assertFalse( t.get( "java.lang.Boolean" ) );
+assertTrue( t.get( "java.io.InputStream" ) );
+assertFalse( t.get( "java.util.ArrayList" ) );
+assertTrue( t.get( "java.util.concurrent.ConcurrentHashMap" ) );
 ```
 
 ### How does it work compared to other Tries?
 
-Normal Trie implementations have a character per node, however TrieHard has a sequence of characters per node. This method saves memory and is just as efficient.
+A typical Trie implementation has an element (i.e. character) per node (a non-compact structure). The Trie implementation in this library is a compact Trie which saves space and is just as efficient.
 
 ### What are the matching options and how do they work?
 
-1. PARTIAL
-2. STARTS_WITH
-3. EXACT 
+Given a Trie `{ "java.io." => 23 }`...
+
+1. __EXACT__  
+  Only an equivalent "java.io." will result in 23.
+2. __STARTS_WITH__   
+  Any superset or equivalent of "java.io." will result in 23. I.E. "java.io.InputStream" is a STARTS_WITH match to the Trie.
+3. __PARTIAL__   
+  Any subset, superset, or equivalent of "java.io." will result in 23. I.E. "java" is a PARTIAL match to the Trie.
 
 ### How do I create my own Trie type?
 
@@ -49,7 +54,3 @@ public interface TrieSequencer<S>
    public S combine(S sequenceA, S sequenceB);
 }
 ```
-
-### TODO
-
-* Documentation

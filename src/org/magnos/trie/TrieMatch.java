@@ -16,9 +16,36 @@
 
 package org.magnos.trie;
 
+/**
+ * The matching logic used for retrieving values from a Trie or for
+ * determining the existence of values given an input/key sequence.
+ * 
+ * @author Philip Diffenderfer
+ * 
+ */
 public enum TrieMatch
 {
+
+   /**
+    * A PARTIAL match only requires the input sequence to be a subset of the
+    * sequences stored in the Trie. If the sequence "meow" is stored in the
+    * Trie, then it can partially match on "m", "me", "meo", "meow", "meowa",
+    * etc.
+    */
    PARTIAL,
-   STARTS_WITH,
-   EXACT
+
+   /**
+    * An EXACT match requires the input sequence to be an exact match to the
+    * sequences stored in the Trie. If the sequence "meow" is stored in the
+    * Trie, then it can only match on "meow".
+    */
+   EXACT,
+
+   /**
+    * A START_WITH match requires the input sequence to be a superset of the
+    * sequences stored in the Trie. If the sequence "meow" is stored in the
+    * Trie, then it can match on "meow", "meowa", "meowab", etc.
+    */
+   STARTS_WITH;
+
 }
