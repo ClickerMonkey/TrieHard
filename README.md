@@ -35,7 +35,7 @@ Normal Trie implementations have a character per node, however TrieHard has a se
 2. STARTS_WITH
 3. EXACT 
 
-### I want to create my own Trie type (i.e. IP), String and char[] aren't sufficient. How do I do this?
+### How do I create my own Trie type?
 
 Implement the following interface and pass it into the constructor of Trie.
 
@@ -49,3 +49,7 @@ public interface TrieSequencer<S>
    public S combine(S sequenceA, S sequenceB);
 }
 ```
+
+### TODO
+
+Document entire library, write tests that cover 100% of code.
