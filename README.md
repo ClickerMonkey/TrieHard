@@ -9,13 +9,13 @@ A generic [Trie](https://en.wikipedia.org/wiki/Trie) implementation in Java. Str
 Trie<String, Boolean> t = Trie.forStrings();
 
 // Include
-t.put( "java.lang.", Boolean.TRUE );
-t.put( "java.io.", Boolean.TRUE );
-t.put( "java.util.concurrent.", Boolean.TRUE );
+t.put( "java.lang.", true );
+t.put( "java.io.", true );
+t.put( "java.util.concurrent.", true );
 
 // Exclude
-t.put( "java.util.", Boolean.FALSE );
-t.put( "java.lang.Boolean", Boolean.FALSE );
+t.put( "java.util.", false );
+t.put( "java.lang.Boolean", false );
 
 assertTrue( t.get( "java.lang.Integer" ) );
 assertTrue( t.get( "java.lang.Long" ) );
