@@ -1,6 +1,8 @@
 TrieHard
 ========
 
+![Stable](http://i4.photobucket.com/albums/y123/Freaklotr4/stage_stable.png)
+
 A generic [Trie](https://en.wikipedia.org/wiki/Trie) implementation in Java. String and char[] implementations are included.
 
 ### Code Example
