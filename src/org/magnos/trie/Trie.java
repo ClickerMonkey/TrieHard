@@ -16,7 +16,8 @@
 
 package org.magnos.trie;
 
-import java.util.Arrays;
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -138,12 +139,14 @@ public class Trie<S, T> implements Map<S, T>
       return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive(), defaultValue );
    }
 
+   private final TrieNode<S, T> root;
    private TrieSequencer<S> sequencer;
-   private TrieNode<S, T> root;
    private TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
-   private int size;
 
-   private SequenceSet sequenceSet;
+   private SequenceSet sequences;
+   private ValueCollection values;
+   private EntrySet entries;
+   private NodeSet nodes;
 
    /**
     * Instantiates a new Trie.
@@ -169,8 +172,11 @@ public class Trie<S, T> implements Map<S, T>
    public Trie( TrieSequencer<S> sequencer, T defaultValue )
    {
       this.root = new TrieNode<S, T>( null, defaultValue, null, 0, 0, new PerfectHashMap<TrieNode<S, T>>() );
+      this.sequences = new SequenceSet( root );
+      this.values = new ValueCollection( root );
+      this.entries = new EntrySet( root );
+      this.nodes = new NodeSet( root );
       this.sequencer = sequencer;
-      this.sequenceSet = new SequenceSet();
    }
 
    /**
@@ -224,7 +230,6 @@ public class Trie<S, T> implements Map<S, T>
          if (max < nodeLength)
          {
             node.split( max, value, sequencer );
-            size++;
 
             return null;
          }
@@ -235,12 +240,9 @@ public class Trie<S, T> implements Map<S, T>
             // end of query, replace value
             if (queryOffset == queryLength)
             {
-               T previousValue = node.value;
-
-               node.value = value;
                node.sequence = query;
-
-               return previousValue;
+               
+               return node.setValue( value );
             }
             // end of node, add children and node
             else
@@ -282,9 +284,7 @@ public class Trie<S, T> implements Map<S, T>
     */
    private T putReturnNull( TrieNode<S, T> node, T value, S query, int queryOffset, int queryLength )
    {
-      node.add( new TrieNode<S, T>( node, value, query, queryOffset, queryLength, null ), sequencer );
-
-      size++;
+      node.add( new TrieNode<S, T>( node, value, query, queryOffset, queryLength, null ), sequencer, true );
 
       return null;
    }
@@ -369,8 +369,6 @@ public class Trie<S, T> implements Map<S, T>
       {
          return null;
       }
-
-      size--;
 
       T value = n.value;
 
@@ -465,7 +463,7 @@ public class Trie<S, T> implements Map<S, T>
     */
    public int size()
    {
-      return size;
+      return root.getSize();
    }
 
    /**
@@ -476,7 +474,7 @@ public class Trie<S, T> implements Map<S, T>
     */
    public boolean isEmpty()
    {
-      return (size == 0);
+      return (root.getSize() == 0);
    }
 
    /**
@@ -518,6 +516,15 @@ public class Trie<S, T> implements Map<S, T>
    @Override
    public boolean containsValue( Object value )
    {
+      Iterable<T> values = new ValueIterator( root );
+
+      for (T v : values)
+      {
+         if (v == value || (v != null && value != null && v.equals( values )))
+         {
+            return true;
+         }
+      }
 
       return false;
    }
@@ -525,23 +532,52 @@ public class Trie<S, T> implements Map<S, T>
    @Override
    public Set<Entry<S, T>> entrySet()
    {
-      return null;
+      return entries;
    }
-   
-   public Set<Entry<S, T>> entrySet(S sequence, TrieMatch match)
+
+   public Set<Entry<S, T>> entrySet( S sequence, TrieMatch match )
    {
-      return null;
+      TrieNode<S, T> root = search( sequence, match );
+
+      return (root == null ? null : new EntrySet( root ));
+   }
+
+   public Set<TrieNode<S, T>> nodeSet()
+   {
+      return nodes;
+   }
+
+   public Set<TrieNode<S, T>> nodeSet( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> root = search( sequence, match );
+
+      return (root == null ? null : new NodeSet( root ));
    }
 
    @Override
    public Set<S> keySet()
    {
-      return sequenceSet;
+      return sequences;
    }
-   
-   public Set<S> keySet(S sequence, TrieMatch match)
+
+   public Set<S> keySet( S sequence, TrieMatch match )
    {
-      return null;
+      TrieNode<S, T> root = search( sequence, match );
+
+      return (root == null ? null : new SequenceSet( root ));
+   }
+
+   @Override
+   public Collection<T> values()
+   {
+      return values;
+   }
+
+   public Collection<T> values( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> root = search( sequence, match );
+
+      return (root == null ? null : new ValueCollection( root ));
    }
 
    @Override
@@ -553,68 +589,43 @@ public class Trie<S, T> implements Map<S, T>
       }
    }
 
-   @Override
-   public Collection<T> values()
+   private class ValueCollection extends AbstractCollection<T>
    {
-      return null;
+
+      private final TrieNode<S, T> root;
+
+      public ValueCollection( TrieNode<S, T> root )
+      {
+         this.root = root;
+      }
+
+      @Override
+      public Iterator<T> iterator()
+      {
+         return new ValueIterator( root );
+      }
+
+      @Override
+      public int size()
+      {
+         return root.getSize();
+      }
    }
-   
-   public Collection<T> values( S sequence, TrieMatch match )
-   {
-      return null;
-   }
 
-   private class SequenceSet implements Set<S>
+   private class SequenceSet extends AbstractSet<S>
    {
 
-      @Override
-      public boolean add( S arg0 )
-      {
-         return false;
-      }
+      private final TrieNode<S, T> root;
 
-      @Override
-      public boolean addAll( Collection<? extends S> arg0 )
+      public SequenceSet( TrieNode<S, T> root )
       {
-         return false;
-      }
-
-      @Override
-      public void clear()
-      {
-         Trie.this.clear();
-      }
-
-      @Override
-      public boolean contains( Object sequence )
-      {
-         return containsKey( sequence );
-      }
-
-      @Override
-      public boolean containsAll( Collection<?> sequences )
-      {
-         for (Object s : sequences)
-         {
-            if (!containsKey( s ))
-            {
-               return false;
-            }
-         }
-
-         return true;
-      }
-
-      @Override
-      public boolean isEmpty()
-      {
-         return Trie.this.isEmpty();
+         this.root = root;
       }
 
       @Override
       public Iterator<S> iterator()
       {
-         return null;
+         return new SequenceIterator( root );
       }
 
       @Override
@@ -624,86 +635,161 @@ public class Trie<S, T> implements Map<S, T>
       }
 
       @Override
-      public boolean removeAll( Collection<?> sequences )
+      public int size()
       {
-         for (Object s : sequences)
-         {
-            if (!remove( s ))
-            {
-               return false;
-            }
-         }
+         return root.getSize();
+      }
+   }
+
+   private class EntrySet extends AbstractSet<Entry<S, T>>
+   {
+
+      private final TrieNode<S, T> root;
+
+      public EntrySet( TrieNode<S, T> root )
+      {
+         this.root = root;
+      }
+
+      @Override
+      public Iterator<Entry<S, T>> iterator()
+      {
+         return new EntryIterator( root );
+      }
+
+      @SuppressWarnings ("unchecked" )
+      @Override
+      public boolean remove( Object entry )
+      {
+         ((TrieNode<S, T>)entry).remove( sequencer );
 
          return true;
       }
 
       @Override
-      public boolean retainAll( Collection<?> arg0 )
+      public int size()
       {
-         return false;
+         return root.getSize();
+      }
+   }
+
+   private class NodeSet extends AbstractSet<TrieNode<S, T>>
+   {
+
+      private final TrieNode<S, T> root;
+
+      public NodeSet( TrieNode<S, T> root )
+      {
+         this.root = root;
+      }
+
+      @Override
+      public Iterator<TrieNode<S, T>> iterator()
+      {
+         return new NodeIterator( root );
+      }
+
+      @SuppressWarnings ("unchecked" )
+      @Override
+      public boolean remove( Object entry )
+      {
+         ((TrieNode<S, T>)entry).remove( sequencer );
+
+         return true;
       }
 
       @Override
       public int size()
       {
-         return Trie.this.size();
+         return root.getSize();
       }
-
-      @Override
-      public Object[] toArray()
-      {
-         Object[] sequences = new Object[size()];
-         
-         int i = 0;
-         for (S sequence : this)
-         {
-            sequences[i++] = sequence;
-         }
-         
-         return sequences;
-      }
-
-      @SuppressWarnings ({ "unchecked", "hiding" } )
-      @Override
-      public <T> T[] toArray( T[] array )
-      {
-         final int size = size();
-         
-         if (array == null || array.length != size)
-         {
-            array = Arrays.copyOf( array, size );
-         }
-         
-         int i = 0;
-         for (S sequence : this)
-         {
-            array[i++] = (T)sequence;
-         }
-         
-         return array;
-      }
-
    }
-   
-   private class AbstractIterator
+
+   private class SequenceIterator extends AbstractIterator<S>
    {
 
-      private TrieNode<S, T> root;
+      public SequenceIterator( TrieNode<S, T> root )
+      {
+         super( root );
+      }
+
+      @Override
+      public S next()
+      {
+         return nextNode().sequence;
+      }
+   }
+
+   private class ValueIterator extends AbstractIterator<T>
+   {
+
+      public ValueIterator( TrieNode<S, T> root )
+      {
+         super( root );
+      }
+
+      @Override
+      public T next()
+      {
+         return nextNode().value;
+      }
+   }
+
+   private class EntryIterator extends AbstractIterator<Entry<S, T>>
+   {
+
+      public EntryIterator( TrieNode<S, T> root )
+      {
+         super( root );
+      }
+
+      @Override
+      public Entry<S, T> next()
+      {
+         return nextNode();
+      }
+   }
+
+   private class NodeIterator extends AbstractIterator<TrieNode<S, T>>
+   {
+
+      public NodeIterator( TrieNode<S, T> root )
+      {
+         super( root );
+      }
+
+      @Override
+      public TrieNode<S, T> next()
+      {
+         return nextNode();
+      }
+   }
+
+   private abstract class AbstractIterator<K> implements Iterable<K>, Iterator<K>
+   {
+
+      private final TrieNode<S, T> root;
       private TrieNode<S, T> previous;
       private TrieNode<S, T> current;
       private int depth;
       private int[] indices = new int[32];
-      
-      public AbstractIterator reset()
+
+      public AbstractIterator( TrieNode<S, T> root )
+      {
+         this.root = root;
+         this.reset();
+      }
+
+      public AbstractIterator<K> reset()
       {
          depth = 0;
-         indices[0] = 0;
+         indices[0] = -1;
          previous = root;
          current = findNext();
-         
+
          return this;
       }
-      
+
       public boolean hasNext()
       {
          return (current != null);
@@ -723,77 +809,66 @@ public class Trie<S, T> implements Map<S, T>
 
       private TrieNode<S, T> findNext()
       {
-         if (depth == 0 && indices[0] > root.children.capacity())
+         if (indices[0] == root.children.capacity())
          {
             return null;
          }
-         
+
          TrieNode<S, T> node = previous;
+         boolean foundValue = false;
+
+         if (node.children == null)
+         {
+            node = node.parent;
+         }
          
-         for (;;) 
+         while (!foundValue)
          {
             final PerfectHashMap<TrieNode<S, T>> children = node.children;
+            final int childCapacity = children.capacity();
             int id = indices[depth] + 1;
-            
-            while (id < children.capacity() && children.valueAt( id ) == null)
+
+            while (id < childCapacity && children.valueAt( id ) == null)
             {
                id++;
             }
-            
-            if (id == children.capacity())
+
+            if (id == childCapacity)
             {
                node = node.parent;
                depth--;
+
+               if (depth == -1)
+               {
+                  node = null;
+                  foundValue = true;
+               }
             }
             else
             {
                indices[depth] = id;
-               previous = children.valueAt( id );
-               
-               if (previous.hasChildren())
+               node = children.valueAt( id );
+
+               if (node.hasChildren())
                {
                   indices[++depth] = -1;
                }
-               
-               if (previous.value != null)
+
+               if (node.value != null)
                {
-                  
+                  foundValue = true;
                }
-            }   
+            }
          }
-      }
-      
-   }
 
-   private class SequenceIterator implements Iterable<S>, Iterator<S>
-   {
-      private int index;
-      private S last;
-      
-      @Override
-      public boolean hasNext()
-      {
-         return (index < size);
+         return node;
       }
 
       @Override
-      public S next()
-      {
-         return last;
-      }
-
-      @Override
-      public void remove()
-      {
-         Trie.this.remove( last );
-      }
-
-      @Override
-      public Iterator<S> iterator()
+      public Iterator<K> iterator()
       {
          return this;
       }
-      
    }
-   
+
 }

@@ -207,6 +207,10 @@ public class TestTrie
       
       assertEquals( 5, values.size() );
 
+      for (String x : values) {
+         System.out.println( x );
+      }
+      
       assertTrue( values.contains( "LANG" ) );
       assertTrue( values.contains( "IO" ) );
       assertTrue( values.contains( "CONCURRENT" ) );

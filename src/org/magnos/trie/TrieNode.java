@@ -1,13 +1,16 @@
 
 package org.magnos.trie;
 
+import java.util.Map.Entry;
+
+
 /**
  * The internal entry class that stores sequences and values.
  * 
  * @author Philip Diffenderfer
- *
+ * 
  */
-public class TrieNode<S, T>
+public class TrieNode<S, T> implements Entry<S, T>
 {
 
    protected TrieNode<S, T> parent;
@@ -16,15 +19,17 @@ public class TrieNode<S, T>
    protected int start;
    protected int end;
    protected PerfectHashMap<TrieNode<S, T>> children = null;
+   protected int size;
 
    protected TrieNode( TrieNode<S, T> parent, T value, S sequence, int start, int end, PerfectHashMap<TrieNode<S, T>> children )
    {
       this.parent = parent;
-      this.value = value;
       this.sequence = sequence;
       this.start = start;
       this.end = end;
       this.children = children;
+      this.size = calculateSize( children );
+      this.setValue( value );
    }
 
    protected TrieNode<S, T> split( int atIndex, T newValue, TrieSequencer<S> sequencer )
@@ -32,16 +37,16 @@ public class TrieNode<S, T>
       TrieNode<S, T> c = new TrieNode<S, T>( this, value, sequence, atIndex + start, end, children );
       c.registerAsParent();
 
-      value = newValue;
+      setValue( newValue );
       end = atIndex + start;
       children = null;
 
-      add( c, sequencer );
+      add( c, sequencer, false );
 
       return c;
    }
 
-   protected void add( TrieNode<S, T> child, TrieSequencer<S> sequencer )
+   protected void add( TrieNode<S, T> child, TrieSequencer<S> sequencer, boolean updateSize )
    {
       int hash = sequencer.hashOf( child.sequence, end );
 
@@ -57,7 +62,7 @@ public class TrieNode<S, T>
 
    protected void remove( TrieSequencer<S> sequencer )
    {
-      value = null;
+      setValue( null );
 
       int childCount = (children == null ? 0 : children.size());
 
@@ -87,6 +92,37 @@ public class TrieNode<S, T>
       }
    }
 
+   private void addSize( int amount )
+   {
+      TrieNode<S, T> curr = this;
+
+      while (curr != null)
+      {
+         curr.size += amount;
+         curr = curr.parent;
+      }
+   }
+
+   private int calculateSize( PerfectHashMap<TrieNode<S, T>> nodes )
+   {
+      int size = 0;
+
+      if (nodes != null)
+      {
+         for (int i = nodes.capacity() - 1; i >= 0; i--)
+         {
+            TrieNode<S, T> n = nodes.valueAt( i );
+
+            if (n != null)
+            {
+               size += n.size;
+            }
+         }
+      }
+
+      return size;
+   }
+
    private void registerAsParent()
    {
       if (children != null)
@@ -102,7 +138,7 @@ public class TrieNode<S, T>
          }
       }
    }
-   
+
    public boolean hasChildren()
    {
       return children != null && children.size() > 0;
@@ -113,6 +149,7 @@ public class TrieNode<S, T>
       return parent;
    }
 
+   @Override
    public T getValue()
    {
       return value;
@@ -131,6 +168,68 @@ public class TrieNode<S, T>
    public int getEnd()
    {
       return end;
+   }
+
+   public int getSize()
+   {
+      return size;
+   }
+
+   public int getChildCount()
+   {
+      return (children == null ? 0 : children.size());
+   }
+
+   @Override
+   public S getKey()
+   {
+      return sequence;
+   }
+
+   @Override
+   public T setValue( T newValue )
+   {
+      T previousValue = value;
+
+      value = newValue;
+
+      if (previousValue == null && value != null)
+      {
+         addSize( 1 );
+      }
+      else if (previousValue != null && value == null)
+      {
+         addSize( -1 );
+      }
+      
+      return previousValue;
+   }
+   
+   @Override
+   public int hashCode() 
+   {
+       return (sequence == null ? 0 : sequence.hashCode())
+            ^ (value == null ? 0 : value.hashCode());
+   }
+   
+   @Override
+   public String toString()
+   {
+      return sequence + "=" + value;
+   }
+   
+   @Override
+   public boolean equals(Object o)
+   {
+      if (o == null || !(o instanceof TrieNode))
+      {
+         return false;
+      }
+      
+      TrieNode<?, ?> node = (TrieNode<?, ?>)o;
+      
+      return (sequence == node.sequence || sequence.equals( node.sequence )) &&
+             (value == node.value || (value != null && node.value != null && value.equals(node.value)));
    }
 
 }

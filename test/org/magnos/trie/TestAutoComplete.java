@@ -3,7 +3,6 @@ package org.magnos.trie;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.TreeSet;
 
 
 public class TestAutoComplete
@@ -52,7 +51,7 @@ public class TestAutoComplete
       
       while (in.hasNextLine())
       {
-         String line = in.nextLine();
+//         String line = in.nextLine();
          
 //         System.out.println( trie.takeSequences( line, TrieMatch.STARTS_WITH, new TreeSet<String>() ) );
       }
