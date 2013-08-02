@@ -66,22 +66,4 @@ public class TestTrieSequencerCharArray
       assertEquals( 'D', seq.hashOf( SEQ3, 4 ) );
    }
    
-   @Test
-   public void testSubSequence()
-   {
-      TrieSequencer<char[]> seq = new TrieSequencerCharArray();
-      
-      assertArrayEquals( "HELL".toCharArray(), seq.subSequence( SEQ1, 0, 4 ) );
-      assertArrayEquals( "LO".toCharArray(), seq.subSequence( SEQ1, 3, 5 ) );
-      assertArrayEquals( "E".toCharArray(), seq.subSequence( SEQ1, 1, 2 ) );
-   }
-   
-   @Test
-   public void testCombine()
-   {
-      TrieSequencer<char[]> seq = new TrieSequencerCharArray();
-      
-      assertArrayEquals( SEQ4, seq.combine( SEQ1, SEQ3 ) );
-   }
-   
 }

@@ -75,29 +75,4 @@ public interface TrieSequencer<S>
     */
    public int hashOf( S sequence, int index );
 
-   /**
-    * Returns a sequence that is a subset of a given sequence given a starting
-    * index (inclusive) and ending index (exclusive).
-    * 
-    * @param sequence
-    *        The sequence to take the subset of.
-    * @param start
-    *        The index at which the subset starts (inclusive).
-    * @param end
-    *        The index at which the subset ends (exclusive).
-    * @return The subset created.
-    */
-   public S subSequence( S sequence, int start, int end );
-
-   /**
-    * Combines two sequences into one.
-    * 
-    * @param sequenceA
-    *        The first sequence to combine.
-    * @param sequenceB
-    *        The second sequence to combine.
-    * @return A sequence that starts with the first and ends with the second.
-    */
-   public S combine( S sequenceA, S sequenceB );
-
 }

@@ -66,22 +66,4 @@ public class TestTrieSequencerCharSequenceCaseInsensitive
       assertEquals( 'd', seq.hashOf( SEQ3, 4 ) );
    }
    
-   @Test
-   public void testSubSequence()
-   {
-      TrieSequencer<String> seq = new TrieSequencerCharSequenceCaseInsensitive<String>();
-      
-      assertEquals( "hell", seq.subSequence( SEQ1, 0, 4 ).toLowerCase() );
-      assertEquals( "lo", seq.subSequence( SEQ1, 3, 5 ).toLowerCase() );
-      assertEquals( "e", seq.subSequence( SEQ1, 1, 2 ).toLowerCase() );
-   }
-   
-   @Test
-   public void testCombine()
-   {
-      TrieSequencer<String> seq = new TrieSequencerCharSequenceCaseInsensitive<String>();
-      
-      assertEquals( SEQ4.toLowerCase(), seq.combine( SEQ1, SEQ3 ).toLowerCase() );
-   }
-   
 }

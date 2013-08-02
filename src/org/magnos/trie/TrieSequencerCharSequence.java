@@ -16,7 +16,6 @@
 
 package org.magnos.trie;
 
-import java.nio.CharBuffer;
 
 
 /**
@@ -53,43 +52,6 @@ public class TrieSequencerCharSequence<S extends CharSequence> implements TrieSe
    public int hashOf( S sequence, int i )
    {
       return sequence.charAt( i );
-   }
-
-   @SuppressWarnings ("unchecked" )
-   @Override
-   public S subSequence( S sequence, int start, int end )
-   {
-      return (S)sequence.subSequence( start, end );
-   }
-
-   @SuppressWarnings ("unchecked" )
-   @Override
-   public S combine( S sequenceA, S sequenceB )
-   {
-      StringBuilder combined = new StringBuilder();
-      combined.append( sequenceA );
-      combined.append( sequenceB );
-
-      Class<?> sequenceClass = sequenceB.getClass();
-
-      if (sequenceClass == String.class)
-      {
-         return (S)combined.toString();
-      }
-      if (sequenceClass == StringBuilder.class)
-      {
-         return (S)combined;
-      }
-      if (sequenceClass == StringBuffer.class)
-      {
-         return (S)new StringBuffer( combined );
-      }
-      if (sequenceClass == CharBuffer.class)
-      {
-         return (S)CharBuffer.wrap( combined );
-      }
-
-      return null;
    }
 
 }

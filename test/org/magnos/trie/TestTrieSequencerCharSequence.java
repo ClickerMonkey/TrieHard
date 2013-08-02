@@ -66,22 +66,4 @@ public class TestTrieSequencerCharSequence
       assertEquals( 'D', seq.hashOf( SEQ3, 4 ) );
    }
    
-   @Test
-   public void testSubSequence()
-   {
-      TrieSequencer<String> seq = new TrieSequencerCharSequence<String>();
-      
-      assertEquals( "HELL", seq.subSequence( SEQ1, 0, 4 ) );
-      assertEquals( "LO", seq.subSequence( SEQ1, 3, 5 ) );
-      assertEquals( "E", seq.subSequence( SEQ1, 1, 2 ) );
-   }
-   
-   @Test
-   public void testCombine()
-   {
-      TrieSequencer<String> seq = new TrieSequencerCharSequence<String>();
-      
-      assertEquals( SEQ4, seq.combine( SEQ1, SEQ3 ) );
-   }
-   
 }

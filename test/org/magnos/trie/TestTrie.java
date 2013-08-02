@@ -22,9 +22,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.junit.Test;
@@ -202,8 +203,8 @@ public class TestTrie
 
       assertEquals( 5, t.size() );
 
-      Set<String> values = t.takeValues( new HashSet<String>() );
-
+      Collection<String> values = t.values();
+      
       assertEquals( 5, values.size() );
 
       assertTrue( values.contains( "LANG" ) );
@@ -226,7 +227,7 @@ public class TestTrie
       
       assertEquals( 5, t.size() );
 
-      Set<String> values = t.takeValues( "java.u", TrieMatch.PARTIAL, new HashSet<String>() );
+      Collection<String> values = t.values( "java.u", TrieMatch.PARTIAL );
 
       assertEquals( 2, values.size() );
       assertTrue( values.contains( "CONCURRENT" ) );
@@ -246,7 +247,7 @@ public class TestTrie
 
       assertEquals( 5, t.size() );
 
-      Set<String> values = t.takeSequences( new HashSet<String>() );
+      Set<String> values = t.keySet();
 
       assertEquals( 5, values.size() );
 
@@ -270,7 +271,7 @@ public class TestTrie
 
       assertEquals( 5, t.size() );
 
-      Set<String> values = t.takeSequences( "java.u", TrieMatch.PARTIAL, new HashSet<String>() );
+      Set<String> values = t.keySet( "java.u", TrieMatch.PARTIAL );
 
       assertEquals( 2, values.size() );
       assertTrue( values.contains( "java.util.concurrent." ) );
@@ -290,7 +291,8 @@ public class TestTrie
 
       assertEquals( 5, t.size() );
 
-      Map<String, Boolean> map = t.takeEntries( new HashMap<String, Boolean>() );
+      Map<String, Boolean> map = new HashMap<String, Boolean>();
+      map.putAll( t );
 
       assertEquals( 5, map.size() );
 
@@ -314,8 +316,13 @@ public class TestTrie
 
       assertEquals( 5, t.size() );
 
-      Map<String, Boolean> map = t.takeEntries( "java.u", TrieMatch.PARTIAL, new HashMap<String, Boolean>() );
-
+      Map<String, Boolean> map = new HashMap<String, Boolean>();
+      
+      Set<Entry<String, Boolean>> entries = t.entrySet( "java.u", TrieMatch.PARTIAL );
+      for (Entry<String, Boolean> e : entries) {
+         map.put( e.getKey(), e.getValue() );
+      }
+      
       assertEquals( 2, map.size() );
 
       assertEquals( Boolean.TRUE, map.get( "java.util.concurrent." ) );
@@ -405,28 +412,8 @@ public class TestTrie
       print( t );
    }
 
-   public static <S, T> void print( Trie<S, T> trie )
+   public static <T> void print( Trie<String, T> trie )
    {
-      trie.iterator( new TrieIterator<S, T>() {
-
-         public void onEntry( S sequence, int index, T value, int depth )
-         {
-            for (int i = 0; i < index; i++)
-            {
-               System.out.print( ' ' );
-            }
-            System.out.print( sequence );
-            if (value != null)
-            {
-               System.out.print( " = " );
-               System.out.println( value );
-            }
-            else
-            {
-               System.out.println();
-            }
-         }
-      } );
    }
 
 }

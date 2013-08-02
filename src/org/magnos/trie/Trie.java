@@ -16,8 +16,11 @@
 
 package org.magnos.trie;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -36,7 +39,7 @@ import java.util.Map;
  * @param <T>
  *        The value type.
  */
-public class Trie<S, T>
+public class Trie<S, T> implements Map<S, T>
 {
 
    /**
@@ -68,7 +71,7 @@ public class Trie<S, T>
     * 
     * @return The reference to a newly instantiated Trie.
     */
-   public static <T> Trie<String, T> forInensitiveStrings()
+   public static <T> Trie<String, T> forInsensitiveStrings()
    {
       return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>() );
    }
@@ -136,9 +139,11 @@ public class Trie<S, T>
    }
 
    private TrieSequencer<S> sequencer;
-   private TrieNode root;
+   private TrieNode<S, T> root;
    private TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
    private int size;
+
+   private SequenceSet sequenceSet;
 
    /**
     * Instantiates a new Trie.
@@ -163,8 +168,9 @@ public class Trie<S, T>
     */
    public Trie( TrieSequencer<S> sequencer, T defaultValue )
    {
-      this.root = new TrieNode( null, defaultValue, null, 0, new PerfectHashMap<TrieNode>() );
+      this.root = new TrieNode<S, T>( null, defaultValue, null, 0, 0, new PerfectHashMap<TrieNode<S, T>>() );
       this.sequencer = sequencer;
+      this.sequenceSet = new SequenceSet();
    }
 
    /**
@@ -188,7 +194,7 @@ public class Trie<S, T>
       }
 
       int queryOffset = 0;
-      TrieNode node = root.children.get( sequencer.hashOf( query, 0 ) );
+      TrieNode<S, T> node = root.children.get( sequencer.hashOf( query, 0 ) );
 
       // The root doesn't have a child that starts with the given sequence...
       if (node == null)
@@ -200,16 +206,16 @@ public class Trie<S, T>
       while (node != null)
       {
          final S nodeSequence = node.sequence;
-         final int nodeLength = sequencer.lengthOf( nodeSequence );
+         final int nodeLength = node.end - node.start;
          final int max = Math.min( nodeLength, queryLength - queryOffset );
-         final int matches = sequencer.matches( nodeSequence, 0, query, queryOffset, max );
+         final int matches = sequencer.matches( nodeSequence, node.start, query, queryOffset, max );
 
          queryOffset += matches;
 
          // mismatch in current node
          if (matches != max)
          {
-            node.split( matches, null );
+            node.split( matches, null, sequencer );
 
             return putReturnNull( node, value, query, queryOffset, queryLength );
          }
@@ -217,7 +223,7 @@ public class Trie<S, T>
          // partial match to the current node
          if (max < nodeLength)
          {
-            node.split( max, value );
+            node.split( max, value, sequencer );
             size++;
 
             return null;
@@ -232,6 +238,7 @@ public class Trie<S, T>
                T previousValue = node.value;
 
                node.value = value;
+               node.sequence = query;
 
                return previousValue;
             }
@@ -243,7 +250,7 @@ public class Trie<S, T>
          }
 
          // full match, end of node
-         TrieNode next = node.children.get( sequencer.hashOf( query, queryOffset ) );
+         TrieNode<S, T> next = node.children.get( sequencer.hashOf( query, queryOffset ) );
 
          if (next == null)
          {
@@ -273,9 +280,9 @@ public class Trie<S, T>
     *        The length of the subset sequence in elements.
     * @return null
     */
-   private T putReturnNull( TrieNode node, T value, S query, int queryOffset, int queryLength )
+   private T putReturnNull( TrieNode<S, T> node, T value, S query, int queryOffset, int queryLength )
    {
-      node.add( new TrieNode( node, value, sequencer.subSequence( query, queryOffset, queryLength ), queryOffset, null ) );
+      node.add( new TrieNode<S, T>( node, value, query, queryOffset, queryLength, null ), sequencer );
 
       size++;
 
@@ -296,7 +303,7 @@ public class Trie<S, T>
     */
    public T get( S sequence, TrieMatch match )
    {
-      TrieNode n = search( sequence, match );
+      TrieNode<S, T> n = search( sequence, match );
 
       return (n != null ? n.value : root.value);
    }
@@ -311,9 +318,10 @@ public class Trie<S, T>
     *         if no match was found. The default value of a Trie is by default
     *         null.
     */
-   public T get( S sequence )
+   @SuppressWarnings ("unchecked" )
+   public T get( Object sequence )
    {
-      return get( sequence, defaultMatch );
+      return get( (S)sequence, defaultMatch );
    }
 
    /**
@@ -352,9 +360,10 @@ public class Trie<S, T>
     * @return The value of the removed sequence, or null if no sequence was
     *         removed.
     */
-   public T remove( S sequence )
+   @SuppressWarnings ("unchecked" )
+   public T remove( Object sequence )
    {
-      TrieNode n = search( sequence, TrieMatch.EXACT );
+      TrieNode<S, T> n = search( (S)sequence, TrieMatch.EXACT );
 
       if (n == null)
       {
@@ -365,7 +374,7 @@ public class Trie<S, T>
 
       T value = n.value;
 
-      n.remove();
+      n.remove( sequencer );
 
       return value;
    }
@@ -379,7 +388,7 @@ public class Trie<S, T>
     *        The matching logic.
     * @return The node that best matched the query based on the logic.
     */
-   private TrieNode search( S query, TrieMatch match )
+   private TrieNode<S, T> search( S query, TrieMatch match )
    {
       final int queryLength = sequencer.lengthOf( query );
 
@@ -390,14 +399,14 @@ public class Trie<S, T>
       }
 
       int queryOffset = 0;
-      TrieNode node = root.children.get( sequencer.hashOf( query, 0 ) );
+      TrieNode<S, T> node = root.children.get( sequencer.hashOf( query, 0 ) );
 
       while (node != null)
       {
          final S nodeSequence = node.sequence;
-         final int nodeLength = sequencer.lengthOf( nodeSequence );
+         final int nodeLength = node.end - node.start;
          final int max = Math.min( nodeLength, queryLength - queryOffset );
-         final int matches = sequencer.matches( nodeSequence, 0, query, queryOffset, max );
+         final int matches = sequencer.matches( nodeSequence, node.start, query, queryOffset, max );
 
          queryOffset += matches;
 
@@ -419,7 +428,7 @@ public class Trie<S, T>
             break;
          }
 
-         TrieNode next = node.children.get( sequencer.hashOf( query, queryOffset ) );
+         TrieNode<S, T> next = node.children.get( sequencer.hashOf( query, queryOffset ) );
 
          // If there is no next, node could be a STARTS_WITH match
          if (next == null)
@@ -433,178 +442,20 @@ public class Trie<S, T>
       // EXACT matches
       if (node != null && match == TrieMatch.EXACT)
       {
-         final int nodeLength = sequencer.lengthOf( node.sequence );
-
          // Check length of last node against query
-         if (node.value == null || node.index + nodeLength != queryLength)
+         if (node.value == null || node.end != queryLength)
          {
             return null;
          }
 
          // Check actual sequence values
-         if (sequencer.matches( node.sequence, 0, query, node.index, nodeLength ) != nodeLength)
+         if (sequencer.matches( node.sequence, 0, query, 0, node.end ) != node.end)
          {
             return null;
          }
       }
 
       return node;
-   }
-
-   /**
-    * Takes all values that exist in this Trie and add them to the given
-    * destination collection.
-    * 
-    * @param destination
-    *        The collection to add all values to.
-    * @return The reference to the given collection.
-    */
-   public <C extends Collection<T>> C takeValues( C destination )
-   {
-      root.takeValues( destination );
-
-      return destination;
-   }
-
-   /**
-    * Takes all values that match the given sequence query and add them to the
-    * given destination collection.
-    * 
-    * @param query
-    *        The sequence to query the Trie.
-    * @param match
-    *        The matching logic.
-    * @param destination
-    *        The collection to add all matched values to.
-    * @return The reference to the given collection.
-    */
-   public <C extends Collection<T>> C takeValues( S query, TrieMatch match, C destination )
-   {
-      TrieNode n = search( query, match );
-
-      if (n != null)
-      {
-         n.takeValues( destination );
-      }
-
-      return destination;
-   }
-
-   /**
-    * Takes all sequences that exist in this Trie and add them to the given
-    * destination collection.
-    * 
-    * @param destination
-    *        The collection to add all sequences to.
-    * @return The reference to the given collection.
-    */
-   public <C extends Collection<S>> C takeSequences( C destination )
-   {
-      root.takeSequences( null, destination );
-
-      return destination;
-   }
-
-   /**
-    * Takes all sequences that match the given sequence query and add them to
-    * the given destination collection.
-    * 
-    * @param query
-    *        The sequence to query the Trie.
-    * @param match
-    *        The matching logic.
-    * @param destination
-    *        The collection to add all matched sequences to.
-    * @return The reference to the given collection.
-    */
-   public <C extends Collection<S>> C takeSequences( S query, TrieMatch match, C destination )
-   {
-      TrieNode n = search( query, match );
-
-      if (n != null)
-      {
-         S parentSequence = null;
-
-         if (n.parent != null)
-         {
-            TrieNode p = n.parent;
-            parentSequence = p.sequence;
-
-            while (p.parent != null && p.parent.sequence != null)
-            {
-               parentSequence = sequencer.combine( p.parent.sequence, parentSequence );
-               p = p.parent;
-            }
-         }
-
-         n.takeSequences( parentSequence, destination );
-      }
-
-      return destination;
-   }
-
-   /**
-    * Takes all entries that exist in this Trie and add them to the given
-    * destination Map.
-    * 
-    * @param destination
-    *        The Map to add all entries to.
-    * @return The reference to the given Map.
-    */
-   public <M extends Map<S, T>> M takeEntries( M destination )
-   {
-      root.takeEntries( null, destination );
-
-      return destination;
-   }
-
-   /**
-    * Takes all entries that match the given sequence query and add them to
-    * the given destination Map.
-    * 
-    * @param query
-    *        The sequence to query the Trie.
-    * @param match
-    *        The matching logic.
-    * @param destination
-    *        The Map to put all matched entries to.
-    * @return The reference to the given Map.
-    */
-   public <M extends Map<S, T>> M takeEntries( S query, TrieMatch match, M destination )
-   {
-      TrieNode n = search( query, match );
-
-      if (n != null)
-      {
-         S parentSequence = null;
-
-         if (n.parent != null)
-         {
-            TrieNode p = n.parent;
-            parentSequence = p.sequence;
-
-            while (p.parent != null && p.parent.sequence != null)
-            {
-               parentSequence = sequencer.combine( p.parent.sequence, parentSequence );
-               p = p.parent;
-            }
-         }
-
-         n.takeEntries( parentSequence, destination );
-      }
-
-      return destination;
-   }
-
-   /**
-    * Iterates over all entries in this Trie.
-    * 
-    * @param iterator
-    *        The iterator to invoke for each entry.
-    */
-   public void iterator( TrieIterator<S, T> iterator )
-   {
-      root.iterator( 0, iterator );
    }
 
    /**
@@ -651,200 +502,298 @@ public class Trie<S, T>
       defaultMatch = match;
    }
 
-   /**
-    * The internal entry class that stores sequences and values.
-    * 
-    * @author Philip Diffenderfer
-    *
-    */
-   private class TrieNode
+   @Override
+   public void clear()
+   {
+      root.children.clear();
+   }
+
+   @SuppressWarnings ("unchecked" )
+   @Override
+   public boolean containsKey( Object key )
+   {
+      return has( (S)key );
+   }
+
+   @Override
+   public boolean containsValue( Object value )
    {
 
-      private TrieNode parent;
-      private T value;
-      private S sequence;
-      private int index;
-      private PerfectHashMap<TrieNode> children = null;
+      return false;
+   }
 
-      private TrieNode( TrieNode parent, T value, S sequence, int index, PerfectHashMap<TrieNode> children )
+   @Override
+   public Set<Entry<S, T>> entrySet()
+   {
+      return null;
+   }
+   
+   public Set<Entry<S, T>> entrySet(S sequence, TrieMatch match)
+   {
+      return null;
+   }
+
+   @Override
+   public Set<S> keySet()
+   {
+      return sequenceSet;
+   }
+   
+   public Set<S> keySet(S sequence, TrieMatch match)
+   {
+      return null;
+   }
+
+   @Override
+   public void putAll( Map<? extends S, ? extends T> map )
+   {
+      for (Entry<? extends S, ? extends T> e : map.entrySet())
       {
-         this.parent = parent;
-         this.value = value;
-         this.sequence = sequence;
-         this.index = index;
-         this.children = children;
-      }
-
-      private TrieNode split( int atIndex, T newValue )
-      {
-         S remainingSequence = sequencer.subSequence( sequence, atIndex, sequencer.lengthOf( sequence ) );
-
-         TrieNode c = new TrieNode( this, value, remainingSequence, atIndex + index, children );
-
-         value = newValue;
-         sequence = sequencer.subSequence( sequence, 0, atIndex );
-         children = null;
-
-         add( c );
-
-         return c;
-      }
-
-      private void add( TrieNode child )
-      {
-         int hash = sequencer.hashOf( child.sequence, 0 );
-
-         if (children == null)
-         {
-            children = new PerfectHashMap<TrieNode>( hash, child );
-         }
-         else
-         {
-            children.put( hash, child );
-         }
-      }
-
-      private void remove()
-      {
-         value = null;
-
-         int childCount = (children == null ? 0 : children.size());
-
-         if (childCount == 0)
-         {
-            parent.children.remove( sequencer.hashOf( sequence, 0 ) );
-
-            if (parent.value == null)
-            {
-               parent.remove();
-            }
-         }
-         else if (childCount == 1)
-         {
-            TrieNode child = children.valueAt( 0 );
-
-            children = child.children;
-            value = child.value;
-            sequence = sequencer.combine( sequence, child.sequence );
-
-            child.children = null;
-            child.parent = null;
-            child.sequence = null;
-            child.value = null;
-         }
-      }
-
-      private void takeValues( Collection<T> values )
-      {
-         if (value != null)
-         {
-            values.add( value );
-         }
-
-         if (children == null)
-         {
-            return;
-         }
-
-         for (int i = 0; i < children.capacity(); i++)
-         {
-            TrieNode c = children.valueAt( i );
-
-            if (c != null)
-            {
-               c.takeValues( values );
-            }
-         }
-      }
-
-      private void takeSequences( S parentSequence, Collection<S> sequences )
-      {
-         if (parentSequence == null)
-         {
-            parentSequence = sequence;
-         }
-         else
-         {
-            parentSequence = sequencer.combine( parentSequence, sequence );
-         }
-
-         if (value != null && parentSequence != null)
-         {
-            sequences.add( parentSequence );
-         }
-
-         if (children == null)
-         {
-            return;
-         }
-
-         for (int i = 0; i < children.capacity(); i++)
-         {
-            TrieNode c = children.valueAt( i );
-
-            if (c != null)
-            {
-               c.takeSequences( parentSequence, sequences );
-            }
-         }
-      }
-
-      private void takeEntries( S parentSequence, Map<S, T> map )
-      {
-         if (parentSequence == null)
-         {
-            parentSequence = sequence;
-         }
-         else
-         {
-            parentSequence = sequencer.combine( parentSequence, sequence );
-         }
-
-         if (value != null && parentSequence != null)
-         {
-            map.put( parentSequence, value );
-         }
-
-         if (children == null)
-         {
-            return;
-         }
-
-         for (int i = 0; i < children.capacity(); i++)
-         {
-            TrieNode c = children.valueAt( i );
-
-            if (c != null)
-            {
-               c.takeEntries( parentSequence, map );
-            }
-         }
-      }
-
-      private void iterator( int depth, TrieIterator<S, T> iterator )
-      {
-         if (depth != 0)
-         {
-            iterator.onEntry( sequence, index, value, depth );
-         }
-
-         if (children != null)
-         {
-            final int childCount = children.capacity();
-
-            depth++;
-
-            for (int i = 0; i < childCount; i++)
-            {
-               final TrieNode child = children.valueAt( i );
-
-               if (child != null)
-               {
-                  child.iterator( depth, iterator );
-               }
-            }
-         }
+         put( e.getKey(), e.getValue() );
       }
    }
 
+   @Override
+   public Collection<T> values()
+   {
+      return null;
+   }
+   
+   public Collection<T> values( S sequence, TrieMatch match )
+   {
+      return null;
+   }
+
+   private class SequenceSet implements Set<S>
+   {
+
+      @Override
+      public boolean add( S arg0 )
+      {
+         return false;
+      }
+
+      @Override
+      public boolean addAll( Collection<? extends S> arg0 )
+      {
+         return false;
+      }
+
+      @Override
+      public void clear()
+      {
+         Trie.this.clear();
+      }
+
+      @Override
+      public boolean contains( Object sequence )
+      {
+         return containsKey( sequence );
+      }
+
+      @Override
+      public boolean containsAll( Collection<?> sequences )
+      {
+         for (Object s : sequences)
+         {
+            if (!containsKey( s ))
+            {
+               return false;
+            }
+         }
+
+         return true;
+      }
+
+      @Override
+      public boolean isEmpty()
+      {
+         return Trie.this.isEmpty();
+      }
+
+      @Override
+      public Iterator<S> iterator()
+      {
+         return null;
+      }
+
+      @Override
+      public boolean remove( Object sequence )
+      {
+         return Trie.this.remove( sequence ) != null;
+      }
+
+      @Override
+      public boolean removeAll( Collection<?> sequences )
+      {
+         for (Object s : sequences)
+         {
+            if (!remove( s ))
+            {
+               return false;
+            }
+         }
+
+         return true;
+      }
+
+      @Override
+      public boolean retainAll( Collection<?> arg0 )
+      {
+         return false;
+      }
+
+      @Override
+      public int size()
+      {
+         return Trie.this.size();
+      }
+
+      @Override
+      public Object[] toArray()
+      {
+         Object[] sequences = new Object[size()];
+         
+         int i = 0;
+         for (S sequence : this)
+         {
+            sequences[i++] = sequence;
+         }
+         
+         return sequences;
+      }
+
+      @SuppressWarnings ({ "unchecked", "hiding" } )
+      @Override
+      public <T> T[] toArray( T[] array )
+      {
+         final int size = size();
+         
+         if (array == null || array.length != size)
+         {
+            array = Arrays.copyOf( array, size );
+         }
+         
+         int i = 0;
+         for (S sequence : this)
+         {
+            array[i++] = (T)sequence;
+         }
+         
+         return array;
+      }
+
+   }
+   
+   private class AbstractIterator
+   {
+
+      private TrieNode<S, T> root;
+      private TrieNode<S, T> previous;
+      private TrieNode<S, T> current;
+      private int depth;
+      private int[] indices = new int[32];
+      
+      public AbstractIterator reset()
+      {
+         depth = 0;
+         indices[0] = 0;
+         previous = root;
+         current = findNext();
+         
+         return this;
+      }
+      
+      public boolean hasNext()
+      {
+         return (current != null);
+      }
+
+      public TrieNode<S, T> nextNode()
+      {
+         previous = current;
+         current = findNext();
+         return previous;
+      }
+
+      public void remove()
+      {
+         previous.remove( sequencer );
+      }
+
+      private TrieNode<S, T> findNext()
+      {
+         if (depth == 0 && indices[0] > root.children.capacity())
+         {
+            return null;
+         }
+         
+         TrieNode<S, T> node = previous;
+         
+         for (;;) 
+         {
+            final PerfectHashMap<TrieNode<S, T>> children = node.children;
+            int id = indices[depth] + 1;
+            
+            while (id < children.capacity() && children.valueAt( id ) == null)
+            {
+               id++;
+            }
+            
+            if (id == children.capacity())
+            {
+               node = node.parent;
+               depth--;
+            }
+            else
+            {
+               indices[depth] = id;
+               previous = children.valueAt( id );
+               
+               if (previous.hasChildren())
+               {
+                  indices[++depth] = -1;
+               }
+               
+               if (previous.value != null)
+               {
+                  
+               }
+            }   
+         }
+      }
+      
+   }
+
+   private class SequenceIterator implements Iterable<S>, Iterator<S>
+   {
+      private int index;
+      private S last;
+      
+      @Override
+      public boolean hasNext()
+      {
+         return (index < size);
+      }
+
+      @Override
+      public S next()
+      {
+         return last;
+      }
+
+      @Override
+      public void remove()
+      {
+         Trie.this.remove( last );
+      }
+
+      @Override
+      public Iterator<S> iterator()
+      {
+         return this;
+      }
+      
+   }
+   
 }
