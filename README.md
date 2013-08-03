@@ -3,12 +3,13 @@ TrieHard
 
 ![Stable](http://i4.photobucket.com/albums/y123/Freaklotr4/stage_stable.png)
 
-A generic [Trie](https://en.wikipedia.org/wiki/Trie) implementation in Java. String and char[] implementations are included.
+A generic [Trie](https://en.wikipedia.org/wiki/Trie) implementation in Java. TrieHard comes ready to create Tries of many types:  
+`String`, `char[]`, `byte[]`, `int[]`, `short[]`, `long[]`, and `java.nio.ByteBuffer`
 
 ### Code Example
 
 ```java
-Trie<String, Boolean> t = Trie.forStrings();
+Trie<String, Boolean> t = Tries.forStrings();
 
 // Include
 t.put( "java.lang.", true );
@@ -27,6 +28,11 @@ assertFalse( t.get( "java.util.ArrayList" ) );
 assertTrue( t.get( "java.util.concurrent.ConcurrentHashMap" ) );
 ```
 
+### Performance
+
+You can insert millions of keys/values into TrieHard in a second (average insert on all dictionary words is 300-400 nanoseconds)
+as well as retrieve millions of values in a second (average retrieval is 200-300 nanoseconds).
+
 ### How does it work compared to other Tries?
 
 A typical Trie implementation has an element (i.e. character) per node (a non-compact structure). The Trie implementation in this library is a compact Trie which saves space and is just as efficient.
@@ -42,6 +48,43 @@ Given a Trie `{ "java.io." => 23 }`...
 3. __PARTIAL__   
   Any subset, superset, or equivalent of "java.io." will result in 23. I.E. "java" is a PARTIAL match to the Trie.
 
+### Use Cases
+
+#### Auto-Complete
+
+```java
+Trie<String, Integer> t = Tries.forInsensitiveStrings();
+t.setDefaultMatch( TrieMatch.PARTIAL );
+// Add all available values to the Trie
+t.put( "world", 23 );
+t.put( "worm", 45 );
+t.put( "worry", 76 );
+t.put( "why", -89 );
+t.put( "women", 123 );
+...
+// Given user input, what are possible keys & values?
+String userInput = "WO";
+Set<Entry<String, Integer>> possible = t.nodes( userInput );
+// possible = { world=>23, worm=>45, worry=>76, women=>123 }
+...
+// Use possible to display full keys and their values.
+```
+
+#### IP to Host Mapping
+
+```java
+Trie<byte[], String> mapper = Tries.forBytes();
+mapper.setDefaultMatch( TrieMatch.EXACT );
+...
+mapper.put( socketAddress.getAddress(), "google.com" );
+...
+
+// Given an IP, get the host name
+String host = mapper.get( socketAddress.getAddress() );
+```
+
+#### To see other use cases, request one!
+
 ### How do I create my own Trie type?
 
 Implement the following interface and pass it into the constructor of Trie.
@@ -52,31 +95,5 @@ public interface TrieSequencer<S>
    public int matches(S sequenceA, int indexA, S sequenceB, int indexB, int count);
    public int lengthOf(S sequence);
    public int hashOf(S sequence, int index);
-   public S subSequence(S sequence, int start, int end);
-   public S combine(S sequenceA, S sequenceB);
 }
 ```
-
-### How can I use it as an X?
-
-#### Auto-Complete
-
-```java
-Trie<String, Integer> t = Trie.forInsensitiveStrings();
-// Add all available values to the Trie
-t.put( "world", 23 );
-t.put( "worm", 45 );
-t.put( "worry", 76 );
-t.put( "why", -89 );
-t.put( "women", 123 );
-...
-// Given user input, what are possible values?
-String userInput = "wo";
-Map<String, Integer> possible = t.takeValues( userInput, TrieMatch.PARTIAL, 
-                                              new HashMap<String, Integer>() );
-// possible = { world=>23, worm=>45, worry=>76, women=>123 }
-...
-// Use possible to display full keys and their values.
-```
-
-#### To see other use cases, request one!
