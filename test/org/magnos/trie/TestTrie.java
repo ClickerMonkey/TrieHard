@@ -37,7 +37,7 @@ public class TestTrie
    @Test
    public void testEmptyConstructor()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       assertEquals( 0, t.size() );
       assertTrue( t.isEmpty() );
@@ -54,7 +54,7 @@ public class TestTrie
    @Test
    public void testDefaultValueConstructor()
    {
-      Trie<String, Boolean> t = Trie.forStrings( Boolean.FALSE );
+      Trie<String, Boolean> t = Tries.forStrings( Boolean.FALSE );
 
       assertEquals( Boolean.FALSE, t.get( "meow" ) );
 
@@ -67,7 +67,7 @@ public class TestTrie
    @Test
    public void testSimplePut()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       assertTrue( t.isEmpty() );
 
@@ -91,7 +91,7 @@ public class TestTrie
    @Test
    public void testHasPartialMatch()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "bookshelf", Boolean.TRUE );
       t.put( "wowza", Boolean.FALSE );
@@ -108,7 +108,7 @@ public class TestTrie
    @Test
    public void testHasStartsWithMatch()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "bookshelf", Boolean.TRUE );
       t.put( "wowza", Boolean.FALSE );
@@ -125,7 +125,7 @@ public class TestTrie
    @Test
    public void testHasExactMatch()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "bookshelf", Boolean.TRUE );
       t.put( "wowza", Boolean.FALSE );
@@ -142,7 +142,7 @@ public class TestTrie
    @Test
    public void testGetPartialMatch()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "bookshelf", Boolean.TRUE );
       t.put( "wowza", Boolean.FALSE );
@@ -159,7 +159,7 @@ public class TestTrie
    @Test
    public void testGetStartsWithMatch()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "bookshelf", Boolean.TRUE );
       t.put( "wowza", Boolean.FALSE );
@@ -176,7 +176,7 @@ public class TestTrie
    @Test
    public void testGetExactMatch()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "bookshelf", Boolean.TRUE );
       t.put( "wowza", Boolean.FALSE );
@@ -193,7 +193,7 @@ public class TestTrie
    @Test
    public void testTakeValues()
    {
-      Trie<String, String> t = Trie.forStrings();
+      Trie<String, String> t = Tries.forStrings();
 
       t.put( "java.lang.", "LANG" );
       t.put( "java.io.", "IO" );
@@ -217,7 +217,7 @@ public class TestTrie
    @Test
    public void testTakeValuesSubset()
    {
-      Trie<String, String> t = Trie.forStrings();
+      Trie<String, String> t = Tries.forStrings();
 
       t.put( "java.lang.", "LANG" );
       t.put( "java.io.", "IO" );
@@ -240,7 +240,7 @@ public class TestTrie
    @Test
    public void testTakeSequences()
    {
-      Trie<String, String> t = Trie.forStrings();
+      Trie<String, String> t = Tries.forStrings();
 
       t.put( "java.lang.", "LANG" );
       t.put( "java.io.", "IO" );
@@ -264,7 +264,7 @@ public class TestTrie
    @Test
    public void testTakeSequencesSubset()
    {
-      Trie<String, String> t = Trie.forStrings();
+      Trie<String, String> t = Tries.forStrings();
 
       t.put( "java.lang.", "LANG" );
       t.put( "java.io.", "IO" );
@@ -284,7 +284,7 @@ public class TestTrie
    @Test
    public void testTakeEntries()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "java.lang.", Boolean.TRUE );
       t.put( "java.io.", Boolean.TRUE );
@@ -309,7 +309,7 @@ public class TestTrie
    @Test
    public void testTakeEntriesSubset()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "java.lang.", Boolean.TRUE );
       t.put( "java.io.", Boolean.TRUE );
@@ -338,7 +338,7 @@ public class TestTrie
    @Test
    public void testRemoveBack()
    {
-      Trie<String, Integer> t = Trie.forStrings();
+      Trie<String, Integer> t = Tries.forStrings();
 
       t.put( "hello", 0 );
       t.put( "hello world", 1 );
@@ -364,7 +364,7 @@ public class TestTrie
    @Test
    public void testRemoveFront()
    {
-      Trie<String, Integer> t = Trie.forStrings();
+      Trie<String, Integer> t = Tries.forStrings();
 
       t.put( "hello", 0 );
       t.put( "hello world", 1 );
@@ -391,7 +391,7 @@ public class TestTrie
    @Test
    public void testRemoveFrontManyChildren()
    {
-      Trie<String, Integer> t = Trie.forStrings();
+      Trie<String, Integer> t = Tries.forStrings();
 
       t.put( "hello", 0 );
       t.put( "hello world", 1 );
@@ -421,7 +421,7 @@ public class TestTrie
    @Test
    public void testIterate()
    {
-      Trie<String, Boolean> t = Trie.forStrings();
+      Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "java.lang.", Boolean.TRUE );
       t.put( "java.io.", Boolean.TRUE );

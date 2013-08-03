@@ -40,111 +40,14 @@ import java.util.Set;
  * @param <T>
  *        The value type.
  */
+@SuppressWarnings ("unchecked" )
 public class Trie<S, T> implements Map<S, T>
 {
-
-   /**
-    * Creates a Trie where the keys are case-sensitive Strings.
-    * 
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<String, T> forStrings()
-   {
-      return new Trie<String, T>( new TrieSequencerCharSequence<String>() );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-sensitive Strings.
-    * 
-    * @param defaultValue
-    *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
-    *        and no match was found.
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<String, T> forStrings( T defaultValue )
-   {
-      return new Trie<String, T>( new TrieSequencerCharSequence<String>(), defaultValue );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-insensitive Strings.
-    * 
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<String, T> forInsensitiveStrings()
-   {
-      return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>() );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-insensitive Strings.
-    * 
-    * @param defaultValue
-    *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
-    *        and no match was found.
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<String, T> forInsensitiveStrings( T defaultValue )
-   {
-      return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>(), defaultValue );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-sensitive character arrays.
-    * 
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<char[], T> forChars()
-   {
-      return new Trie<char[], T>( new TrieSequencerCharArray() );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-sensitive character arrays.
-    * 
-    * @param defaultValue
-    *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
-    *        and no match was found.
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<char[], T> forChars( T defaultValue )
-   {
-      return new Trie<char[], T>( new TrieSequencerCharArray(), defaultValue );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-insensitive character arrays.
-    * 
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<char[], T> forInsensitiveChars()
-   {
-      return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive() );
-   }
-
-   /**
-    * Creates a Trie where the keys are case-insensitive character arrays.
-    * 
-    * @param defaultValue
-    *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
-    *        and no match was found.
-    * @return The reference to a newly instantiated Trie.
-    */
-   public static <T> Trie<char[], T> forInsensitiveChars( T defaultValue )
-   {
-      return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive(), defaultValue );
-   }
-   
    /**
     * An empty collection/set to return.
     */
    private static final EmptyContainer<?> EMPTY_CONTAINER = new EmptyContainer<Object>();
 
-   
    private final TrieNode<S, T> root;
    private TrieSequencer<S> sequencer;
    private TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
@@ -306,7 +209,6 @@ public class Trie<S, T> implements Map<S, T>
     * @return The value for the given sequence, or the default value of the Trie
     *         if no match was found. The default value of a Trie is by default
     *         null.
-    * 
     */
    public T get( S sequence, TrieMatch match )
    {
@@ -324,8 +226,8 @@ public class Trie<S, T> implements Map<S, T>
     * @return The value for the given sequence, or the default value of the Trie
     *         if no match was found. The default value of a Trie is by default
     *         null.
+    * @see #get(Object, TrieMatch)
     */
-   @SuppressWarnings ("unchecked" )
    public T get( Object sequence )
    {
       return get( (S)sequence, defaultMatch );
@@ -352,12 +254,26 @@ public class Trie<S, T> implements Map<S, T>
     * @param sequence
     *        The sequence to match.
     * @return True if a value exists for the given sequence, otherwise false.
+    * @see #has(Object, TrieMatch)
     */
    public boolean has( S sequence )
    {
       return hasAfter( root, sequence, defaultMatch );
    }
 
+   /**
+    * Starts at the root node and searches for a node with the given sequence
+    * based on the given matching logic.
+    * 
+    * @param root
+    *        The node to start searching from.
+    * @param sequence
+    *        The sequence to search for.
+    * @param match
+    *        The matching logic to use while searching.
+    * @return True if root or a child of root has a match on the sequence,
+    *         otherwise false.
+    */
    protected boolean hasAfter( TrieNode<S, T> root, S sequence, TrieMatch match )
    {
       return search( root, sequence, match ) != null;
@@ -372,12 +288,23 @@ public class Trie<S, T> implements Map<S, T>
     * @return The value of the removed sequence, or null if no sequence was
     *         removed.
     */
-   @SuppressWarnings ("unchecked" )
    public T remove( Object sequence )
    {
       return removeAfter( root, (S)sequence );
    }
 
+   /**
+    * Starts at the root node and searches for a node with the exact given
+    * sequence, once found it
+    * removes it and returns the value. If a node is not found with the exact
+    * sequence then null is returned.
+    * 
+    * @param root
+    *        The root to start searching from.
+    * @param sequence
+    *        The exact sequence to search for.
+    * @return The value of the removed node or null if it wasn't found.
+    */
    protected T removeAfter( TrieNode<S, T> root, S sequence )
    {
       TrieNode<S, T> n = search( root, sequence, TrieMatch.EXACT );
@@ -392,6 +319,281 @@ public class Trie<S, T> implements Map<S, T>
       n.remove( sequencer );
 
       return value;
+   }
+
+   /**
+    * Returns the number of sequences-value pairs in this Trie.
+    * 
+    * @return The number of sequences-value pairs in this Trie.
+    */
+   public int size()
+   {
+      return root.getSize();
+   }
+
+   /**
+    * Determines whether this Trie is empty.
+    * 
+    * @return 0 if the Trie doesn't have any sequences-value pairs, otherwise
+    *         false.
+    */
+   public boolean isEmpty()
+   {
+      return (root.getSize() == 0);
+   }
+
+   /**
+    * Returns the default TrieMatch used for {@link #has(Object)} and
+    * {@link #get(Object)}.
+    * 
+    * @return The default TrieMatch set on this Trie.
+    */
+   public TrieMatch getDefaultMatch()
+   {
+      return defaultMatch;
+   }
+
+   /**
+    * Sets the default TrieMatch used for {@link #has(Object)} and
+    * {@link #get(Object)}.
+    * 
+    * @param match
+    *        The new default TrieMatch to set on this Trie.
+    */
+   public void setDefaultMatch( TrieMatch match )
+   {
+      defaultMatch = match;
+   }
+
+   @Override
+   public boolean containsKey( Object key )
+   {
+      return has( (S)key );
+   }
+
+   @Override
+   public boolean containsValue( Object value )
+   {
+      Iterable<T> values = new ValueIterator( root );
+
+      for (T v : values)
+      {
+         if (v == value || (v != null && value != null && v.equals( values )))
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   @Override
+   public Set<Entry<S, T>> entrySet()
+   {
+      return entries;
+   }
+
+   /**
+    * Returns a {@link Set} of {@link Entry}s that match the given sequence
+    * based on the default matching logic. If no matches were found then a
+    * Set with size 0 will be returned. The set returned can have Entries
+    * removed directly from it, given that the Entries are from this Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @return The reference to a Set of Entries that matched.
+    */
+   public Set<Entry<S, T>> entrySet( S sequence )
+   {
+      return entrySet( sequence, defaultMatch );
+   }
+
+   /**
+    * Returns a {@link Set} of {@link Entry}s that match the given sequence
+    * based on the given matching logic. If no matches were found then a
+    * Set with size 0 will be returned. The set returned can have Entries
+    * removed directly from it, given that the Entries are from this Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @param match
+    *        The matching logic to use.
+    * @return The reference to a Set of Entries that matched.
+    */
+   public Set<Entry<S, T>> entrySet( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> node = search( root, sequence, match );
+
+      return (node == null ? (Set<Entry<S, T>>)EMPTY_CONTAINER : new EntrySet( node ));
+   }
+
+   /**
+    * The same as {@link #entrySet()} except instead of a {@link Set} of
+    * {@link Entry}s, it's a {@link Set} of {@link TrieNode}s.
+    * 
+    * @return The reference to the Set of all valued nodes in this Trie.
+    * @see #entrySet()
+    */
+   public Set<TrieNode<S, T>> nodeSet()
+   {
+      return nodes;
+   }
+
+   /**
+    * Returns a {@link Set} of {@link TrieNode}s that match the given sequence
+    * based on the default matching logic. If no matches were found then a Set
+    * with size 0 will be returned. The set returned can have TrieNodes removed
+    * directly from it, given that the TrieNodes are from this Trie and they
+    * will be removed from this Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @return The reference to a Set of TrieNodes that matched.
+    * @see #entrySet(Object)
+    */
+   public Set<TrieNode<S, T>> nodeSet( S sequence )
+   {
+      return nodeSet( sequence, defaultMatch );
+   }
+
+   /**
+    * Returns a {@link Set} of {@link TrieNode}s that match the given sequence
+    * based on the given matching logic. If no matches were found then a Set
+    * with size 0 will be returned. The set returned can have TrieNodes removed
+    * directly from it, given that the TrieNodes are from this Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @param match
+    *        The matching logic to use.
+    * @return The reference to a Set of TrieNodes that matched.
+    * @see #entrySet(Object, TrieMatch)
+    */
+   public Set<TrieNode<S, T>> nodeSet( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> node = search( root, sequence, match );
+
+      return (node == null ? (Set<TrieNode<S, T>>)EMPTY_CONTAINER : new NodeSet( node ));
+   }
+
+   /**
+    * Returns an {@link Iterable} of all {@link TrieNode}s in this Trie
+    * including naked (null-value) nodes.
+    * 
+    * @return The reference to a new Iterable.
+    */
+   public Iterable<TrieNode<S, T>> nodeSetAll()
+   {
+      return new NodeAllIterator( root );
+   }
+
+   /**
+    * Returns an {@link Iterable} of all {@link TrieNode}s in this Trie that
+    * match the given sequence using the default matching logic including naked
+    * (null-value) nodes.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @return The reference to a new Iterable.
+    */
+   public Iterable<TrieNode<S, T>> nodeSetAll( S sequence )
+   {
+      return nodeSetAll( sequence, defaultMatch );
+
+   }
+
+   /**
+    * Returns an {@link Iterable} of all {@link TrieNode}s in this Trie that
+    * match the given sequence using the given matching logic including naked
+    * (null-value) nodes.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @param match
+    *        The matching logic to use.
+    * @return The reference to a new Iterable.
+    */
+   public Iterable<TrieNode<S, T>> nodeSetAll( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> node = search( root, sequence, match );
+
+      return (node == null ? (Iterable<TrieNode<S, T>>)EMPTY_CONTAINER : new NodeAllIterator( root ));
+   }
+
+   @Override
+   public Set<S> keySet()
+   {
+      return sequences;
+   }
+
+   /**
+    * Returns a {@link Set} of all keys (sequences) in this Trie that match the
+    * given sequence given the default matching logic. If no matches were found
+    * then a Set with size 0 will be returned. The Set returned can have
+    * keys/sequences removed directly from it and they will be removed from this
+    * Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @return The reference to a Set of keys/sequences that matched.
+    */
+   public Set<S> keySet( S sequence )
+   {
+      return keySet( sequence, defaultMatch );
+   }
+
+   /**
+    * Returns a {@link Set} of all keys (sequences) in this Trie that match the
+    * given sequence with the given matching logic. If no matches were found
+    * then a Set with size 0 will be returned. The Set returned can have
+    * keys/sequences removed directly from it and they will be removed from this
+    * Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @param match
+    *        The matching logic to use.
+    * @return The reference to a Set of keys/sequences that matched.
+    */
+   public Set<S> keySet( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> node = search( root, sequence, match );
+
+      return (node == null ? (Set<S>)EMPTY_CONTAINER : new SequenceSet( node ));
+   }
+
+   @Override
+   public Collection<T> values()
+   {
+      return values;
+   }
+
+   public Collection<T> values( S sequence )
+   {
+      return values( sequence, defaultMatch );
+   }
+
+   public Collection<T> values( S sequence, TrieMatch match )
+   {
+      TrieNode<S, T> node = search( root, sequence, match );
+
+      return (node == null ? null : new ValueCollection( node ));
+   }
+
+   @Override
+   public void putAll( Map<? extends S, ? extends T> map )
+   {
+      for (Entry<? extends S, ? extends T> e : map.entrySet())
+      {
+         put( e.getKey(), e.getValue() );
+      }
+   }
+
+   @Override
+   public void clear()
+   {
+      root.children.clear();
+      root.size = 0;
    }
 
    /**
@@ -489,176 +691,6 @@ public class Trie<S, T> implements Map<S, T>
       return node;
    }
 
-   /**
-    * Returns the number of sequences-value pairs in this Trie.
-    * 
-    * @return The number of sequences-value pairs in this Trie.
-    */
-   public int size()
-   {
-      return root.getSize();
-   }
-
-   /**
-    * Determines whether this Trie is empty.
-    * 
-    * @return 0 if the Trie doesn't have any sequences-value pairs, otherwise
-    *         false.
-    */
-   public boolean isEmpty()
-   {
-      return (root.getSize() == 0);
-   }
-
-   /**
-    * Returns the default TrieMatch used for {@link #has(Object)} and
-    * {@link #get(Object)}.
-    * 
-    * @return The default TrieMatch set on this Trie.
-    */
-   public TrieMatch getDefaultMatch()
-   {
-      return defaultMatch;
-   }
-
-   /**
-    * Sets the default TrieMatch used for {@link #has(Object)} and
-    * {@link #get(Object)}.
-    * 
-    * @param match
-    *        The new default TrieMatch to set on this Trie.
-    */
-   public void setDefaultMatch( TrieMatch match )
-   {
-      defaultMatch = match;
-   }
-
-   @Override
-   public void clear()
-   {
-      root.children.clear();
-      root.size = 0;
-   }
-
-   @SuppressWarnings ("unchecked" )
-   @Override
-   public boolean containsKey( Object key )
-   {
-      return has( (S)key );
-   }
-
-   @Override
-   public boolean containsValue( Object value )
-   {
-      Iterable<T> values = new ValueIterator( root );
-
-      for (T v : values)
-      {
-         if (v == value || (v != null && value != null && v.equals( values )))
-         {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
-   @Override
-   public Set<Entry<S, T>> entrySet()
-   {
-      return entries;
-   }
-
-   public Set<Entry<S, T>> entrySet( S sequence )
-   {
-      return entrySet( sequence, defaultMatch ); 
-   }
-   
-   @SuppressWarnings ("unchecked" )
-   public Set<Entry<S, T>> entrySet( S sequence, TrieMatch match )
-   {
-      TrieNode<S, T> node = search( root, sequence, match );
-
-      return (node == null ? (Set<Entry<S, T>>)EMPTY_CONTAINER : new EntrySet( node ));
-   }
-
-   public Set<TrieNode<S, T>> nodeSet()
-   {
-      return nodes;
-   }
-
-   @SuppressWarnings ("unchecked" )
-   public Set<TrieNode<S, T>> nodeSet( S sequence, TrieMatch match )
-   {
-      TrieNode<S, T> node = search( root, sequence, match );
-
-      return (node == null ? (Set<TrieNode<S, T>>)EMPTY_CONTAINER : new NodeSet( node ));
-   }
-
-   public Iterable<TrieNode<S, T>> nodeSetAll()
-   {
-      return new NodeAllIterator( root );
-   }
-
-   public Iterable<TrieNode<S, T>> nodeSetAll( S sequence )
-   {
-      return nodeSetAll( sequence, defaultMatch );
-   }
-   
-   @SuppressWarnings ("unchecked" )
-   public Iterable<TrieNode<S, T>> nodeSetAll( S sequence, TrieMatch match )
-   {
-      TrieNode<S, T> node = search( root, sequence, match );
-
-      return (node == null ? (Iterable<TrieNode<S, T>>)EMPTY_CONTAINER : new NodeAllIterator( root ));
-   }
-
-   @Override
-   public Set<S> keySet()
-   {
-      return sequences;
-   }
-   
-   public Set<S> keySet( S sequence )
-   {
-      return keySet( sequence, defaultMatch ); 
-   }
-
-   @SuppressWarnings ("unchecked" )
-   public Set<S> keySet( S sequence, TrieMatch match )
-   {
-      TrieNode<S, T> node = search( root, sequence, match );
-
-      return (node == null ? (Set<S>)EMPTY_CONTAINER : new SequenceSet( node ));
-   }
-   
-   @Override
-   public Collection<T> values()
-   {
-      return values;
-   }
-   
-   public Collection<T> values( S sequence )
-   {
-      return values( sequence, defaultMatch );
-   }
-
-   public Collection<T> values( S sequence, TrieMatch match )
-   {
-      TrieNode<S, T> node = search( root, sequence, match );
-
-      return (node == null ? null : new ValueCollection( node ));
-   }
-
-   @Override
-   public void putAll( Map<? extends S, ? extends T> map )
-   {
-      for (Entry<? extends S, ? extends T> e : map.entrySet())
-      {
-         put( e.getKey(), e.getValue() );
-      }
-   }
-
    private class ValueCollection extends AbstractCollection<T>
    {
 
@@ -698,14 +730,12 @@ public class Trie<S, T> implements Map<S, T>
          return new SequenceIterator( root );
       }
 
-      @SuppressWarnings ("unchecked" )
       @Override
       public boolean remove( Object sequence )
       {
          return removeAfter( root, (S)sequence ) != null;
       }
 
-      @SuppressWarnings ("unchecked" )
       @Override
       public boolean contains( Object sequence )
       {
@@ -735,7 +765,6 @@ public class Trie<S, T> implements Map<S, T>
          return new EntryIterator( root );
       }
 
-      @SuppressWarnings ("unchecked" )
       @Override
       public boolean remove( Object entry )
       {
@@ -750,7 +779,6 @@ public class Trie<S, T> implements Map<S, T>
          return removable;
       }
 
-      @SuppressWarnings ("unchecked" )
       @Override
       public boolean contains( Object entry )
       {
@@ -782,7 +810,6 @@ public class Trie<S, T> implements Map<S, T>
          return new NodeIterator( root );
       }
 
-      @SuppressWarnings ("unchecked" )
       @Override
       public boolean remove( Object entry )
       {
@@ -797,7 +824,6 @@ public class Trie<S, T> implements Map<S, T>
          return removable;
       }
 
-      @SuppressWarnings ("unchecked" )
       @Override
       public boolean contains( Object entry )
       {
@@ -1028,7 +1054,7 @@ public class Trie<S, T> implements Map<S, T>
       {
          return 0;
       }
-      
+
       @Override
       public boolean hasNext()
       {
@@ -1044,8 +1070,8 @@ public class Trie<S, T> implements Map<S, T>
       @Override
       public void remove()
       {
-         
+
       }
    }
-   
+
 }

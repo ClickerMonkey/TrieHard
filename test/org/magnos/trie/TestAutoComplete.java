@@ -25,7 +25,7 @@ public class TestAutoComplete
       
       long t1 = System.nanoTime();
       
-      Trie<String, Boolean> trie = Trie.forInsensitiveStrings( Boolean.FALSE );
+      Trie<String, Boolean> trie = Tries.forInsensitiveStrings( Boolean.FALSE );
       
       for (String word : dictionary)
       {
