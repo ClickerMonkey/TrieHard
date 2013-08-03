@@ -37,16 +37,17 @@ public class TrieNode<S, T> implements Entry<S, T>
       TrieNode<S, T> c = new TrieNode<S, T>( this, value, sequence, atIndex + start, end, children );
       c.registerAsParent();
 
+      setValue( null );
       setValue( newValue );
       end = atIndex + start;
       children = null;
 
-      add( c, sequencer, false );
+      add( c, sequencer );
 
       return c;
    }
 
-   protected void add( TrieNode<S, T> child, TrieSequencer<S> sequencer, boolean updateSize )
+   protected void add( TrieNode<S, T> child, TrieSequencer<S> sequencer )
    {
       int hash = sequencer.hashOf( child.sequence, end );
 
@@ -62,19 +63,17 @@ public class TrieNode<S, T> implements Entry<S, T>
 
    protected void remove( TrieSequencer<S> sequencer )
    {
+      // Decrement size if this node had a value
       setValue( null );
 
       int childCount = (children == null ? 0 : children.size());
 
+      // When there are no children, remove this node from it's parent.
       if (childCount == 0)
       {
          parent.children.remove( sequencer.hashOf( sequence, start ) );
-
-         if (parent.value == null)
-         {
-            parent.remove( sequencer );
-         }
       }
+      // With one child, become the child!
       else if (childCount == 1)
       {
          TrieNode<S, T> child = children.valueAt( 0 );
@@ -82,6 +81,7 @@ public class TrieNode<S, T> implements Entry<S, T>
          children = child.children;
          value = child.value;
          sequence = child.sequence;
+         end = child.end;
 
          child.children = null;
          child.parent = null;
@@ -178,6 +178,18 @@ public class TrieNode<S, T> implements Entry<S, T>
    public int getChildCount()
    {
       return (children == null ? 0 : children.size());
+   }
+   
+   public TrieNode<S, T> getRoot()
+   {
+      TrieNode<S, T> n = parent;
+      
+      while (n.parent != null)
+      {
+         n = n.parent;
+      }
+      
+      return n;
    }
 
    @Override

@@ -204,20 +204,16 @@ public class TestTrie
       assertEquals( 5, t.size() );
 
       Collection<String> values = t.values();
-      
+
       assertEquals( 5, values.size() );
 
-      for (String x : values) {
-         System.out.println( x );
-      }
-      
       assertTrue( values.contains( "LANG" ) );
       assertTrue( values.contains( "IO" ) );
       assertTrue( values.contains( "CONCURRENT" ) );
       assertTrue( values.contains( "UTIL" ) );
       assertTrue( values.contains( "BOOLEAN" ) );
    }
-   
+
    @Test
    public void testTakeValuesSubset()
    {
@@ -228,7 +224,7 @@ public class TestTrie
       t.put( "java.util.concurrent.", "CONCURRENT" );
       t.put( "java.util.", "UTIL" );
       t.put( "java.lang.Boolean", "BOOLEAN" );
-      
+
       assertEquals( 5, t.size() );
 
       Collection<String> values = t.values( "java.u", TrieMatch.PARTIAL );
@@ -236,6 +232,9 @@ public class TestTrie
       assertEquals( 2, values.size() );
       assertTrue( values.contains( "CONCURRENT" ) );
       assertTrue( values.contains( "UTIL" ) );
+      assertFalse( values.contains( "LANG" ) );
+      assertFalse( values.contains( "IO" ) );
+      assertFalse( values.contains( "BOOLEAN" ) );
    }
 
    @Test
@@ -294,7 +293,7 @@ public class TestTrie
       t.put( "java.lang.Boolean", Boolean.FALSE );
 
       assertEquals( 5, t.size() );
-
+      
       Map<String, Boolean> map = new HashMap<String, Boolean>();
       map.putAll( t );
 
@@ -322,15 +321,18 @@ public class TestTrie
 
       Map<String, Boolean> map = new HashMap<String, Boolean>();
       
-      Set<Entry<String, Boolean>> entries = t.entrySet( "java.u", TrieMatch.PARTIAL );
-      for (Entry<String, Boolean> e : entries) {
+      for(Entry<String, Boolean> e : t.entrySet( "java.u", TrieMatch.PARTIAL ))
+      {
          map.put( e.getKey(), e.getValue() );
       }
-      
+
       assertEquals( 2, map.size() );
 
       assertEquals( Boolean.TRUE, map.get( "java.util.concurrent." ) );
       assertEquals( Boolean.FALSE, map.get( "java.util." ) );
+      assertFalse( map.containsKey( "java.lang." ) );
+      assertFalse( map.containsKey( "java.io." ) );
+      assertFalse( map.containsKey( "java.lang.Boolean" ) );
    }
 
    @Test
@@ -349,10 +351,14 @@ public class TestTrie
 
       assertNotNull( r1 );
       assertEquals( 1, r1.intValue() );
-      
+
       assertEquals( 1, t.size() );
       assertEquals( 0, t.get( "hello" ).intValue() );
       assertEquals( 0, t.get( "hello world" ).intValue() );
+      
+      Set<String> keys = t.keySet();
+      assertTrue( keys.contains( "hello" ) );
+      assertFalse( keys.contains( "hello world" ) );
    }
 
    @Test
@@ -371,10 +377,15 @@ public class TestTrie
 
       assertNotNull( r0 );
       assertEquals( 0, r0.intValue() );
-      
+
       assertEquals( 1, t.size() );
       assertEquals( 1, t.get( "hello", TrieMatch.PARTIAL ).intValue() );
       assertEquals( 1, t.get( "hello world" ).intValue() );
+      assertNull( t.get( "hello", TrieMatch.EXACT ) );
+      
+      Set<String> keys = t.keySet();
+      assertTrue( keys.contains("hello world") );
+      assertFalse( keys.contains("hello") );
    }
 
    @Test
@@ -395,11 +406,16 @@ public class TestTrie
 
       assertNotNull( r0 );
       assertEquals( 0, r0.intValue() );
-      
+
       assertEquals( 2, t.size() );
       assertNull( t.get( "hello", TrieMatch.PARTIAL ) );
       assertEquals( 1, t.get( "hello world" ).intValue() );
       assertEquals( 2, t.get( "hello, clarice" ).intValue() );
+      
+      Set<String> keys = t.keySet();
+      assertTrue( keys.contains( "hello world" ) );
+      assertTrue( keys.contains( "hello, clarice" ) );
+      assertFalse( keys.contains( "hello" ) );
    }
 
    @Test
@@ -413,11 +429,42 @@ public class TestTrie
       t.put( "java.util.", Boolean.FALSE );
       t.put( "java.lang.Boolean", Boolean.FALSE );
 
-      print( t );
+      String expected = 
+         "java.\n" +
+         "     io. = true\n" +
+         "     lang. = true\n" +
+         "          Boolean = false\n" +
+         "     util. = false\n" +
+         "          concurrent. = true\n";
+      
+      StringBuilder printed = print( t );
+      
+      assertEquals( expected, printed.toString() );
    }
 
-   public static <T> void print( Trie<String, T> trie )
+   public static <T> StringBuilder print( Trie<String, T> trie )
    {
+      StringBuilder out = new StringBuilder();
+      
+      for (TrieNode<String, T> node : trie.nodeSetAll())
+      {
+         for (int i = 0; i < node.getStart(); i++)
+         {
+            out.append( ' ' );
+         }
+         
+         out.append( node.getSequence().substring( node.getStart(), node.getEnd() ) );
+         
+         if (node.value != null)
+         {
+            out.append( " = " );
+            out.append( node.value );
+         }
+         
+         out.append( System.lineSeparator() );
+      }
+      
+      return out;
    }
 
 }

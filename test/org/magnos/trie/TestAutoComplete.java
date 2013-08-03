@@ -3,6 +3,7 @@ package org.magnos.trie;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 
 public class TestAutoComplete
@@ -26,19 +27,8 @@ public class TestAutoComplete
       
       Trie<String, Boolean> trie = Trie.forInsensitiveStrings( Boolean.FALSE );
       
-      boolean had = false;
-      
       for (String word : dictionary)
       {
-         if (word.startsWith( "hap" ))
-         {
-            had = true;
-         }
-         else if (had && !word.startsWith("ha"))
-         {
-            trie.hashCode();
-         }
-         
          trie.put( word, Boolean.TRUE );
       }
       
@@ -51,9 +41,13 @@ public class TestAutoComplete
       
       while (in.hasNextLine())
       {
-//         String line = in.nextLine();
-         
-//         System.out.println( trie.takeSequences( line, TrieMatch.STARTS_WITH, new TreeSet<String>() ) );
+         String line = in.nextLine();
+     
+         long t3 = System.nanoTime();
+         Set<String> keys = trie.keySet( line, TrieMatch.PARTIAL );
+         System.out.print( keys );
+         long t4 = System.nanoTime();
+         System.out.format( " with %d items in %.9f seconds.\n", keys.size(), (t4 - t3) * 0.000000001 );
       }
       
       in.close();
