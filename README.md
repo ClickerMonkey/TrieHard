@@ -30,8 +30,8 @@ assertTrue( t.get( "java.util.concurrent.ConcurrentHashMap" ) );
 
 ### Performance
 
-You can insert millions of keys/values into TrieHard in a second (average insert on all dictionary words is 300-400 nanoseconds)
-as well as retrieve millions of values in a second (average retrieval is 200-300 nanoseconds).
+You can insert __millions__ of keys/values into TrieHard in a second (average insert on all dictionary words is 300-400 nanoseconds)
+as well as retrieve __millions__ of values in a second (average retrieval is 200-300 nanoseconds).
 
 ### How does it work compared to other Tries?
 
