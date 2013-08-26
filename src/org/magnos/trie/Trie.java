@@ -144,21 +144,18 @@ public class Trie<S, T> implements Map<S, T>
             return null;
          }
 
+         // Full match to query, replace value and sequence
+         if (queryOffset == queryLength)
+         {
+            node.sequence = query;
+
+            return node.setValue( value );
+         }
+         
          // full match, end of the query or node
          if (node.children == null)
          {
-            // end of query, replace value
-            if (queryOffset == queryLength)
-            {
-               node.sequence = query;
-
-               return node.setValue( value );
-            }
-            // end of node, add children and node
-            else
-            {
-               return putReturnNull( node, value, query, queryOffset, queryLength );
-            }
+            return putReturnNull( node, value, query, queryOffset, queryLength );
          }
 
          // full match, end of node

@@ -87,6 +87,21 @@ public class TestTrie
       assertFalse( t.get( "java.util.ArrayList" ) );
       assertTrue( t.get( "java.util.concurrent.ConcurrentHashMap" ) );
    }
+   
+   @Test
+   public void testSamePut()
+   {
+      Trie<String, Integer> t = Tries.forInsensitiveStrings();
+
+      t.put( "a", 1 );
+      t.put( "A", 2 );
+      t.put( "Ab", 3 );
+      t.put( "Abc", 5 );
+      t.put( "AB", 4 );
+      
+      assertEquals( 4, t.get( "ab" ).intValue() );
+      assertEquals( 2, t.get( "a" ).intValue() );
+   }
 
    @Test
    public void testHasPartialMatch()
@@ -421,6 +436,8 @@ public class TestTrie
    @Test
    public void testIterate()
    {
+      final String LS = System.lineSeparator();
+      
       Trie<String, Boolean> t = Tries.forStrings();
 
       t.put( "java.lang.", Boolean.TRUE );
@@ -430,12 +447,12 @@ public class TestTrie
       t.put( "java.lang.Boolean", Boolean.FALSE );
 
       String expected = 
-         "java.\n" +
-         "     io. = true\n" +
-         "     lang. = true\n" +
-         "          Boolean = false\n" +
-         "     util. = false\n" +
-         "          concurrent. = true\n";
+         "java." + LS + 
+         "     io. = true" + LS +
+         "     lang. = true" + LS +
+         "          Boolean = false" + LS +
+         "     util. = false" + LS +
+         "          concurrent. = true" + LS;
       
       StringBuilder printed = print( t );
       
@@ -444,6 +461,8 @@ public class TestTrie
 
    public static <T> StringBuilder print( Trie<String, T> trie )
    {
+      final String LS = System.lineSeparator();
+      
       StringBuilder out = new StringBuilder();
       
       for (TrieNode<String, T> node : trie.nodeSetAll())
@@ -461,7 +480,7 @@ public class TestTrie
             out.append( node.value );
          }
          
-         out.append( System.lineSeparator() );
+         out.append( LS );
       }
       
       return out;
