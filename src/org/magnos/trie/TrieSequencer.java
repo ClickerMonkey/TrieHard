@@ -16,6 +16,8 @@
 
 package org.magnos.trie;
 
+
+
 /**
  * A TrieSequencer enables a Trie to use keys of type S. A sequence is a
  * linear set of elements.
@@ -52,8 +54,7 @@ public interface TrieSequencer<S>
     * 
     * @param sequence
     *        The sequence to measure.
-    * @return
-    *         The length of the given sequence.
+    * @return The length of the given sequence.
     */
    public int lengthOf( S sequence );
 
@@ -70,9 +71,8 @@ public interface TrieSequencer<S>
     *        The sequence.
     * @param index
     *        The index of the element to calculate the hash of.
-    * @return
-    *         The hash of the element in the sequence at the index.
+    * @return The hash of the element in the sequence at the index.
     */
    public int hashOf( S sequence, int index );
-
+   
 }

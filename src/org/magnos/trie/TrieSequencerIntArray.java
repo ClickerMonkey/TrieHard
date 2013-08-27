@@ -18,6 +18,7 @@ package org.magnos.trie;
 
 
 
+
 /**
  * A {@link TrieSequencer} implementation where int[] is the sequence type.
  * 

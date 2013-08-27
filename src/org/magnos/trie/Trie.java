@@ -43,6 +43,7 @@ import java.util.Set;
 @SuppressWarnings ("unchecked" )
 public class Trie<S, T> implements Map<S, T>
 {
+
    /**
     * An empty collection/set to return.
     */
@@ -86,6 +87,33 @@ public class Trie<S, T> implements Map<S, T>
       this.entries = new EntrySet( root );
       this.nodes = new NodeSet( root );
       this.sequencer = sequencer;
+   }
+
+   /**
+    * Sets the default value of the Trie, which is the value returned when a
+    * query is unsuccessful.
+    * 
+    * @param defaultValue
+    *        The default value of the Trie is the value returned when
+    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        and no match was found.
+    */
+   public void setDefaultValue( T defaultValue )
+   {
+      root.value = defaultValue;
+   }
+
+   /**
+    * Returns a Trie with the same default value, match, and
+    * {@link TrieSequencer} as this Trie.
+    * 
+    * @return The reference to a new Trie.
+    */
+   public Trie<S, T> newEmptyClone()
+   {
+      Trie<S, T> t = new Trie<S, T>( sequencer, root.value );
+      t.defaultMatch = defaultMatch;
+      return t;
    }
 
    /**
@@ -151,7 +179,7 @@ public class Trie<S, T> implements Map<S, T>
 
             return node.setValue( value );
          }
-         
+
          // full match, end of the query or node
          if (node.children == null)
          {

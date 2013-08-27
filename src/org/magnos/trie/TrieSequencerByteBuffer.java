@@ -52,5 +52,5 @@ public class TrieSequencerByteBuffer implements TrieSequencer<ByteBuffer>
    {
       return sequence.get( i ) & 0xFF; 
    }
-
+   
 }

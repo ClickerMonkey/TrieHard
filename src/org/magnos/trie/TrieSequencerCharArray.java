@@ -18,6 +18,7 @@ package org.magnos.trie;
 
 
 
+
 /**
  * A {@link TrieSequencer} implementation where char[] is the sequence type.
  * This implementation is case-sensitive.
