@@ -48,6 +48,10 @@ Given a Trie `{ "java.io." => 23 }`...
 3. __PARTIAL__   
   Any subset, superset, or equivalent of "java.io." will result in 23. I.E. "java" is a PARTIAL match to the Trie.
 
+### Builds
+- [TrieHard-1.0.jar](https://github.com/ClickerMonkey/TrieHard/raw/master/build/TrieHard-1.0.jar)
+- [TrieHard-src-1.0.jar](https://github.com/ClickerMonkey/TrieHard/raw/master/build/TrieHard-1.0-src.jar) - includes source code
+
 ### Use Cases
 
 #### Auto-Complete
