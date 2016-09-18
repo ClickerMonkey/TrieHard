@@ -8,4 +8,5 @@ doc/
 *.sublime-workspace
 .README.md.html
 /target/
-.settings/
+/.settings/
+/.classpath
