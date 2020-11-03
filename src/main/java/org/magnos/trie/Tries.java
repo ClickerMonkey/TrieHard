@@ -35,7 +35,7 @@ public final class Tries
     */
    public static <T> Trie<String, T> forStrings()
    {
-      return new Trie<String, T>( new TrieSequencerCharSequence<String>() );
+      return new Trie<String, T>( TrieSequencerCharSequence.INSTANCE );
    }
 
    /**
@@ -49,7 +49,7 @@ public final class Tries
     */
    public static <T> Trie<String, T> forStrings( T defaultValue )
    {
-      return new Trie<String, T>( new TrieSequencerCharSequence<String>(), defaultValue );
+      return new Trie<String, T>( TrieSequencerCharSequence.INSTANCE, defaultValue );
    }
 
    /**
@@ -59,7 +59,7 @@ public final class Tries
     */
    public static <T> Trie<String, T> forInsensitiveStrings()
    {
-      return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>() );
+      return new Trie<String, T>( TrieSequencerCharSequenceCaseInsensitive.INSTANCE );
    }
 
    /**
@@ -73,7 +73,7 @@ public final class Tries
     */
    public static <T> Trie<String, T> forInsensitiveStrings( T defaultValue )
    {
-      return new Trie<String, T>( new TrieSequencerCharSequenceCaseInsensitive<String>(), defaultValue );
+      return new Trie<String, T>( TrieSequencerCharSequenceCaseInsensitive.INSTANCE, defaultValue );
    }
 
    /**
@@ -83,7 +83,7 @@ public final class Tries
     */
    public static <T> Trie<char[], T> forChars()
    {
-      return new Trie<char[], T>( new TrieSequencerCharArray() );
+      return new Trie<char[], T>( TrieSequencerCharArray.INSTANCE );
    }
 
    /**
@@ -97,7 +97,7 @@ public final class Tries
     */
    public static <T> Trie<char[], T> forChars( T defaultValue )
    {
-      return new Trie<char[], T>( new TrieSequencerCharArray(), defaultValue );
+      return new Trie<char[], T>( TrieSequencerCharArray.INSTANCE, defaultValue );
    }
 
    /**
@@ -107,7 +107,7 @@ public final class Tries
     */
    public static <T> Trie<char[], T> forInsensitiveChars()
    {
-      return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive() );
+      return new Trie<char[], T>( TrieSequencerCharArrayCaseInsensitive.INSTANCE );
    }
 
    /**
@@ -121,7 +121,7 @@ public final class Tries
     */
    public static <T> Trie<char[], T> forInsensitiveChars( T defaultValue )
    {
-      return new Trie<char[], T>( new TrieSequencerCharArrayCaseInsensitive(), defaultValue );
+      return new Trie<char[], T>( TrieSequencerCharArrayCaseInsensitive.INSTANCE, defaultValue );
    }
 
    /**
@@ -131,7 +131,7 @@ public final class Tries
     */
    public static <T> Trie<byte[], T> forBytes()
    {
-      return new Trie<byte[], T>( new TrieSequencerByteArray() );
+      return new Trie<byte[], T>( TrieSequencerByteArray.INSTANCE );
    }
 
    /**
@@ -145,7 +145,7 @@ public final class Tries
     */
    public static <T> Trie<byte[], T> forBytes( T defaultValue )
    {
-      return new Trie<byte[], T>( new TrieSequencerByteArray(), defaultValue );
+      return new Trie<byte[], T>( TrieSequencerByteArray.INSTANCE, defaultValue );
    }
 
    /**
@@ -155,7 +155,7 @@ public final class Tries
     */
    public static <T> Trie<short[], T> forShorts()
    {
-      return new Trie<short[], T>( new TrieSequencerShortArray() );
+      return new Trie<short[], T>( TrieSequencerShortArray.INSTANCE );
    }
 
    /**
@@ -169,7 +169,7 @@ public final class Tries
     */
    public static <T> Trie<short[], T> forShorts( T defaultValue )
    {
-      return new Trie<short[], T>( new TrieSequencerShortArray(), defaultValue );
+      return new Trie<short[], T>( TrieSequencerShortArray.INSTANCE, defaultValue );
    }
 
    /**
@@ -179,7 +179,7 @@ public final class Tries
     */
    public static <T> Trie<int[], T> forInts()
    {
-      return new Trie<int[], T>( new TrieSequencerIntArray() );
+      return new Trie<int[], T>( TrieSequencerIntArray.INSTANCE );
    }
 
    /**
@@ -193,7 +193,7 @@ public final class Tries
     */
    public static <T> Trie<int[], T> forInts( T defaultValue )
    {
-      return new Trie<int[], T>( new TrieSequencerIntArray(), defaultValue );
+      return new Trie<int[], T>( TrieSequencerIntArray.INSTANCE, defaultValue );
    }
 
    /**
@@ -203,7 +203,7 @@ public final class Tries
     */
    public static <T> Trie<long[], T> forLongs()
    {
-      return new Trie<long[], T>( new TrieSequencerLongArray() );
+      return new Trie<long[], T>( TrieSequencerLongArray.INSTANCE );
    }
 
    /**
@@ -217,7 +217,7 @@ public final class Tries
     */
    public static <T> Trie<long[], T> forLongs( T defaultValue )
    {
-      return new Trie<long[], T>( new TrieSequencerLongArray(), defaultValue );
+      return new Trie<long[], T>( TrieSequencerLongArray.INSTANCE, defaultValue );
    }
 
    /**
@@ -227,7 +227,7 @@ public final class Tries
     */
    public static <T> Trie<ByteBuffer, T> forByteBuffers()
    {
-      return new Trie<ByteBuffer, T>( new TrieSequencerByteBuffer() );
+      return new Trie<ByteBuffer, T>( TrieSequencerByteBuffer.INSTANCE );
    }
 
    /**
@@ -241,7 +241,7 @@ public final class Tries
     */
    public static <T> Trie<ByteBuffer, T> forByteBuffers( T defaultValue )
    {
-      return new Trie<ByteBuffer, T>( new TrieSequencerByteBuffer(), defaultValue );
+      return new Trie<ByteBuffer, T>( TrieSequencerByteBuffer.INSTANCE, defaultValue );
    }
-
+   
 }

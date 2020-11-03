@@ -16,6 +16,7 @@
 
 package org.magnos.trie;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 
@@ -31,8 +32,13 @@ import java.util.Arrays;
  *        The value type.
  */
 @SuppressWarnings ("unchecked" )
-public class PerfectHashMap<T>
+public class PerfectHashMap<T> implements Serializable
 {
+
+   /**
+	* 
+	*/
+   private static final long serialVersionUID = 1L;
 
    private int min;
    private int size;

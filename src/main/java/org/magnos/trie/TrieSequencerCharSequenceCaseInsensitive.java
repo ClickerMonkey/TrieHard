@@ -25,6 +25,13 @@ package org.magnos.trie;
  */
 public class TrieSequencerCharSequenceCaseInsensitive<S extends CharSequence> extends TrieSequencerCharSequence<S>
 {
+	
+   /**
+	* 
+	*/
+   private static final long serialVersionUID = 1L;
+	
+   public static final TrieSequencerCharSequenceCaseInsensitive<String> INSTANCE = new TrieSequencerCharSequenceCaseInsensitive<String>();
 
    @Override
    public int matches( S sequenceA, int indexA, S sequenceB, int indexB, int count )
@@ -47,6 +54,11 @@ public class TrieSequencerCharSequenceCaseInsensitive<S extends CharSequence> ex
    public int hashOf( S sequence, int i )
    {
       return Character.toLowerCase( sequence.charAt( i ) );
+   }
+   
+   protected Object readResolve()
+   {
+	   return INSTANCE;
    }
 
 }

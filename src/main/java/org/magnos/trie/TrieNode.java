@@ -16,7 +16,9 @@
 
 package org.magnos.trie;
 
+import java.io.Serializable;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 
 /**
@@ -61,8 +63,13 @@ import java.util.Map.Entry;
  * @author Philip Diffenderfer
  * 
  */
-public class TrieNode<S, T> implements Entry<S, T>
+public class TrieNode<S, T> implements Entry<S, T>, Serializable
 {
+
+   /**
+	* 
+	*/
+   private static final long serialVersionUID = 1L;
 
    protected TrieNode<S, T> parent;
    protected T value;
@@ -71,6 +78,14 @@ public class TrieNode<S, T> implements Entry<S, T>
    protected int end;
    protected PerfectHashMap<TrieNode<S, T>> children = null;
    protected int size;
+   
+   /**
+    * Instantiates a new TrieNode for deserialization.
+    */
+   protected TrieNode()
+   {
+	   
+   }
 
    /**
     * Instantiates a new TrieNode.
@@ -406,9 +421,14 @@ public class TrieNode<S, T> implements Entry<S, T>
    @Override
    public T setValue( T newValue )
    {
-      T previousValue = value;
+	  return update( (previousValue) -> newValue );
+   }
+   
+   public T update( Function<T, T> updater )
+   {
+	   T previousValue = value;
 
-      value = newValue;
+      value = updater.apply( previousValue );
 
       if (previousValue == null && value != null)
       {

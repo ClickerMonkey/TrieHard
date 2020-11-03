@@ -1,21 +1,20 @@
 <project name="TrieHard" default="build" basedir=".">
 
-	<property file="build.properties"/>
+	<property file="build.properties" />
 
 	<property name="jar-core" value="${build}/${project}-${version}.jar" />
 	<property name="jar-core-src" value="${build}/${project}-${version}-src.jar" />
 
 	<target name="init">
 
-		<mkdir dir="${build.in}"/>
+		<mkdir dir="${build.in}" />
 
 	</target>
 
 	<target name="compile" depends="init">
 
-		<javac srcdir="${build.src}" destdir="${build.in}"
-			target="${java.target}" source="${java.source}" 
-			debug="on" optimize="on" includeantruntime="false">
+		<javac srcdir="${build.src}" destdir="${build.in}" target="${java.target}"
+			source="${java.source}" debug="on" optimize="on" includeantruntime="false">
 			<compilerarg value="-Xlint" />
 		</javac>
 
@@ -24,45 +23,36 @@
 	<target name="build" depends="compile">
 
 		<jar jarfile="${jar-core}" basedir="${build.in}">
-			<fileset dir="." includes="${license}"/>
+			<fileset dir="." includes="${license}" />
 		</jar>
 
 		<jar jarfile="${jar-core-src}" basedir="${build.in}" compress="true">
 			<fileset dir="${build.src}" />
-			<fileset dir="." includes="${license}"/>
+			<fileset dir="." includes="${license}" />
 		</jar>
 
 	</target>
 
-    <target name="javadoc" depends="compile">
+	<target name="javadoc" depends="compile">
 
-        <javadoc
-			access="public"
-        	classpath="${build.in}"
-        	destdir="${doc}"
-        	nodeprecated="false"
-        	nodeprecatedlist="false"
-        	noindex="false"
-        	nonavbar="false"
-        	notree="false"
-        	source="${java.source}"
-        	sourcepath="${build.src}"
-        	splitindex="true"
-        	use="true" version="true" author="true"
-        	windowtitle="${title}">
+		<javadoc access="public" classpath="${build.in}" destdir="${doc}"
+			nodeprecated="false" nodeprecatedlist="false" noindex="false"
+			nonavbar="false" notree="false" source="${java.source}" sourcepath="${build.src}"
+			splitindex="true" use="true" version="true" author="true"
+			windowtitle="${title}">
 
-        	 <link href="http://download.oracle.com/javase/6/docs/api/"/>
+			<link href="http://download.oracle.com/javase/6/docs/api/" />
 
-        </javadoc>
+		</javadoc>
 
-    </target>
+	</target>
 
 	<target name="clean">
 
-		<delete dir="${build.in}"/>
+		<delete dir="${build.in}" />
 
-		<delete file="${jar-core}"/>
-		<delete file="${jar-core-src}"/>
+		<delete file="${jar-core}" />
+		<delete file="${jar-core-src}" />
 
 	</target>
 

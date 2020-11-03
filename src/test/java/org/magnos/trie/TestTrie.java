@@ -16,19 +16,15 @@
 
 package org.magnos.trie;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.junit.Test;
 
 
 public class TestTrie
@@ -243,7 +239,7 @@ public class TestTrie
       assertEquals( 5, t.size() );
 
       Collection<String> values = t.values( "java.u", TrieMatch.PARTIAL );
-
+      
       assertEquals( 2, values.size() );
       assertTrue( values.contains( "CONCURRENT" ) );
       assertTrue( values.contains( "UTIL" ) );

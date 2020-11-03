@@ -16,6 +16,7 @@
 
 package org.magnos.trie;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
@@ -31,8 +32,13 @@ import java.util.Set;
  * @param <E>
  *        The element type.
  */
-public class TrieSet<E> implements Set<E>
+public class TrieSet<E> implements Set<E>, Serializable
 {
+
+   /**
+	* 
+	*/
+   private static final long serialVersionUID = 1L;
 
    /**
     * The flag used in the underlying Trie of a TrieSet to indicate the given

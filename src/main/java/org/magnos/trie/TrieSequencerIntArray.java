@@ -27,6 +27,13 @@ package org.magnos.trie;
  */
 public class TrieSequencerIntArray implements TrieSequencer<int[]>
 {
+	
+   /**
+	* 
+	*/
+   private static final long serialVersionUID = 1L;
+	
+   public static final TrieSequencerIntArray INSTANCE = new TrieSequencerIntArray();
 
    @Override
    public int matches( int[] sequenceA, int indexA, int[] sequenceB, int indexB, int count )
@@ -52,6 +59,11 @@ public class TrieSequencerIntArray implements TrieSequencer<int[]>
    public int hashOf( int[] sequence, int i )
    {
       return sequence[i];
+   }
+   
+   protected Object readResolve()
+   {
+	   return INSTANCE;
    }
 
 }

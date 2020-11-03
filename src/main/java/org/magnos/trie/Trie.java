@@ -16,12 +16,14 @@
 
 package org.magnos.trie;
 
+import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 
 /**
@@ -41,22 +43,35 @@ import java.util.Set;
  *        The value type.
  */
 @SuppressWarnings ("unchecked" )
-public class Trie<S, T> implements Map<S, T>
+public class Trie<S, T> implements Map<S, T>, Serializable
 {
+
+   /**
+	* 
+	*/
+   private static final long serialVersionUID = 1L;
 
    /**
     * An empty collection/set to return.
     */
    private static final EmptyContainer<?> EMPTY_CONTAINER = new EmptyContainer<Object>();
 
-   private final TrieNode<S, T> root;
-   private TrieSequencer<S> sequencer;
-   private TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
+   protected final TrieNode<S, T> root;
+   protected TrieSequencer<S> sequencer;
+   protected TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
 
-   private SequenceSet sequences;
-   private ValueCollection values;
-   private EntrySet entries;
-   private NodeSet nodes;
+   protected transient SequenceSet sequences;
+   protected transient ValueCollection values;
+   protected transient EntrySet entries;
+   protected transient NodeSet nodes;
+   
+   /**
+    * Instantiates a new Trie for deserialization.
+    */
+   protected Trie()
+   {
+	   this( null, null );
+   }
 
    /**
     * Instantiates a new Trie.
@@ -102,6 +117,18 @@ public class Trie<S, T> implements Map<S, T>
    {
       root.value = defaultValue;
    }
+   
+   /**
+    * Gets the default value of the Trie, which is the value returned when a
+    * query is unsuccessful.
+    * 
+    * @return
+    * 		The default value of the Trie.
+    */
+   public T getDefaultValue()
+   {
+	   return root.value;
+   }
 
    /**
     * Returns a Trie with the same default value, match, and
@@ -111,9 +138,33 @@ public class Trie<S, T> implements Map<S, T>
     */
    public Trie<S, T> newEmptyClone()
    {
-      Trie<S, T> t = new Trie<S, T>( sequencer, root.value );
+      Trie<S, T> t = new Trie<S, T>( sequencer, getDefaultValue() );
       t.defaultMatch = defaultMatch;
       return t;
+   }
+   
+   /**
+    * Updates the value at the given sequence. If no value exists then null is 
+    * passed to the function. The result of the function replaces the previous value.
+    * 
+    * @param sequence
+    * 		The sequence.
+    * @param updater
+    * 		The function which takes the previous value (if any) and returns 
+    * 		a new value.
+    */
+   public void update( S sequence, Function<T, T> updater )
+   {
+	   TrieNode<S, T> n = search( root, sequence, TrieMatch.EXACT );
+
+	   if (n == null)
+	   {
+		   this.put( sequence, updater.apply( null ) );
+	   }
+	   else
+	   {
+		   n.value = updater.apply( n.value );
+	   }
    }
 
    /**
@@ -239,7 +290,7 @@ public class Trie<S, T> implements Map<S, T>
    {
       TrieNode<S, T> n = search( root, sequence, match );
 
-      return (n != null ? n.value : root.value);
+      return (n != null ? n.value : getDefaultValue());
    }
 
    /**
@@ -320,9 +371,8 @@ public class Trie<S, T> implements Map<S, T>
 
    /**
     * Starts at the root node and searches for a node with the exact given
-    * sequence, once found it
-    * removes it and returns the value. If a node is not found with the exact
-    * sequence then null is returned.
+    * sequence, once found it removes it and returns the value. If a node is 
+    * not found with the exact sequence then null is returned.
     * 
     * @param root
     *        The root to start searching from.
@@ -592,12 +642,34 @@ public class Trie<S, T> implements Map<S, T>
    {
       return values;
    }
-
+   
+   /**
+    * Returns a {@link Collection} of the values that match the given sequence
+    * given the default matching logic. If no matches were found then a 
+    * Collection with size 0 will be returned. The Collection returned can have
+    * values removed directly from it and they will be removed from this Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @return The reference to a Collection of values that matched.
+    */
    public Collection<T> values( S sequence )
    {
       return values( sequence, defaultMatch );
    }
-
+   
+   /**
+    * Returns a {@link Collection} of the values that match the given sequence
+    * and the given matching logic. If no matches were found then a Collection 
+    * with size 0 will be returned. The Collection returned can have values
+    * removed directly from it and they will be removed from this Trie.
+    * 
+    * @param sequence
+    *        The sequence to match on.
+    * @param match
+    *        The matching logic to use.
+    * @return The reference to a Collection of values that matched.
+    */
    public Collection<T> values( S sequence, TrieMatch match )
    {
       TrieNode<S, T> node = search( root, sequence, match );
@@ -630,7 +702,7 @@ public class Trie<S, T> implements Map<S, T>
     *        The matching logic.
     * @return The node that best matched the query based on the logic.
     */
-   private TrieNode<S, T> search( TrieNode<S, T> root, S query, TrieMatch match )
+   protected TrieNode<S, T> search( TrieNode<S, T> root, S query, TrieMatch match )
    {
       final int queryLength = sequencer.lengthOf( query );
 

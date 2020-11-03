@@ -8,4 +8,12 @@ doc/
 *.sublime-workspace
 .README.md.html
 /target/
+*/target/
 /.settings/
+/.classpath
+/.settings
+/.project
+.DS_Store
+._.DS_Store
+Thumbs.db
+.*.swp

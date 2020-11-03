@@ -16,10 +16,12 @@
 
 package org.magnos.trie;
 
+import java.io.Serializable;
+
 
 
 /**
- * A TrieSequencer enables a Trie to use keys of type S. A sequence is a
+ * A TrieSequencer enables a {@link Trie} to use keys of type S. A sequence is a
  * linear set of elements.
  * 
  * @author Philip Diffenderfer
@@ -27,7 +29,7 @@ package org.magnos.trie;
  * @param <S>
  *        The sequence type.
  */
-public interface TrieSequencer<S>
+public interface TrieSequencer<S> extends Serializable
 {
 
    /**
