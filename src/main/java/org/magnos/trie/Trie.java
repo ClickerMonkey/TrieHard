@@ -56,14 +56,41 @@ public class Trie<S, T> implements Map<S, T>, Serializable
     */
    private static final EmptyContainer<?> EMPTY_CONTAINER = new EmptyContainer<Object>();
 
+   /**
+    * The root of the Trie.
+    */
    protected final TrieNode<S, T> root;
+   
+   /**
+    * The implementation that understands the Trie's sequences.
+    */
    protected TrieSequencer<S> sequencer;
+   
+   /**
+    * The default match of the Trie when one is not specified.
+    */
    protected TrieMatch defaultMatch = TrieMatch.STARTS_WITH;
-
+   
+   /**
+    * The cached set of sequences stored in this Trie.
+    */
    protected transient SequenceSet sequences;
+   
+   /**
+    * The cached collection of values stored in this Trie.
+    */
    protected transient ValueCollection values;
+   
+   /**
+    * The cached set of Entries stored in this Trie.
+    */
    protected transient EntrySet entries;
+   
+   /**
+    * The cached set of Nodes stored in this Trie.
+    */
    protected transient NodeSet nodes;
+   
    
    /**
     * Instantiates a new Trie for deserialization.
@@ -142,31 +169,7 @@ public class Trie<S, T> implements Map<S, T>, Serializable
       t.defaultMatch = defaultMatch;
       return t;
    }
-   
-   /**
-    * Updates the value at the given sequence. If no value exists then null is 
-    * passed to the function. The result of the function replaces the previous value.
-    * 
-    * @param sequence
-    * 		The sequence.
-    * @param updater
-    * 		The function which takes the previous value (if any) and returns 
-    * 		a new value.
-    */
-   public void update( S sequence, Function<T, T> updater )
-   {
-	   TrieNode<S, T> n = search( root, sequence, TrieMatch.EXACT );
-
-	   if (n == null)
-	   {
-		   this.put( sequence, updater.apply( null ) );
-	   }
-	   else
-	   {
-		   n.value = updater.apply( n.value );
-	   }
-   }
-
+  
    /**
     * Puts the value in the Trie with the given sequence.
     * 
@@ -175,14 +178,52 @@ public class Trie<S, T> implements Map<S, T>, Serializable
     * @param value
     *        The value to place in the Trie.
     * @return
-    *         The previous value in the Trie with the same sequence if one
-    *         existed, otherwise null.
+    *        The previous value in the Trie with the same sequence if one
+    *        existed, otherwise null.
     */
    public T put( S query, T value )
    {
+	   return this.put( query, (previousValue) -> value, null );
+   }
+
+   /**
+    * Updates the value at the given sequence. If no value exists then null is 
+    * passed to the function. The result of the function replaces the previous value.
+    * 
+    * @param query
+    *        The sequence.
+    * @param updater
+    * 		The function which takes the previous value (if any) and returns 
+    * 		a new value. 
+    * @return
+    *       The previous value in the Trie with the same sequence if one
+    *       existed, otherwise null.
+    */
+   public T put( S query, Function<T, T> updater )
+   {
+	   return this.put( query, updater, null );
+   }
+
+   /**
+    * Updates the value at the given sequence. If no value exists then null is 
+    * passed to the function. The result of the function replaces the previous value.
+    * 
+    * @param query
+    *        The sequence.
+    * @param updater
+    * 		The function which takes the previous value (if any) and returns 
+    * 		a new value.
+    * @param defaultPrevious
+    * 		The value to pass to the update function when adding to the Trie. 
+    * @return
+    *       The previous value in the Trie with the same sequence if one
+    *       existed, otherwise null.
+    */
+   public T put( S query, Function<T, T> updater, T defaultPrevious )
+   {
       final int queryLength = sequencer.lengthOf( query );
 
-      if (value == null || queryLength == 0)
+      if (queryLength == 0)
       {
          return null;
       }
@@ -194,7 +235,7 @@ public class Trie<S, T> implements Map<S, T>, Serializable
       if (node == null)
       {
          // Add the sequence and value directly to root!
-         return putReturnNull( root, value, query, queryOffset, queryLength );
+         return putReturnNull( root, updater.apply(defaultPrevious), query, queryOffset, queryLength );
       }
 
       while (node != null)
@@ -211,13 +252,13 @@ public class Trie<S, T> implements Map<S, T>, Serializable
          {
             node.split( matches, null, sequencer );
 
-            return putReturnNull( node, value, query, queryOffset, queryLength );
+            return putReturnNull( node, updater.apply(defaultPrevious), query, queryOffset, queryLength );
          }
 
          // partial match to the current node
          if (max < nodeLength)
          {
-            node.split( max, value, sequencer );
+            node.split( max, updater.apply(defaultPrevious), sequencer );
             node.sequence = query;
 
             return null;
@@ -228,13 +269,13 @@ public class Trie<S, T> implements Map<S, T>, Serializable
          {
             node.sequence = query;
 
-            return node.setValue( value );
+            return node.update( updater );
          }
 
          // full match, end of the query or node
          if (node.children == null)
          {
-            return putReturnNull( node, value, query, queryOffset, queryLength );
+            return putReturnNull( node, updater.apply(defaultPrevious), query, queryOffset, queryLength );
          }
 
          // full match, end of node
@@ -242,7 +283,7 @@ public class Trie<S, T> implements Map<S, T>, Serializable
 
          if (next == null)
          {
-            return putReturnNull( node, value, query, queryOffset, queryLength );
+            return putReturnNull( node, updater.apply(defaultPrevious), query, queryOffset, queryLength );
          }
 
          // full match, query or node remaining
@@ -696,6 +737,8 @@ public class Trie<S, T> implements Map<S, T>, Serializable
    /**
     * Searches in the Trie based on the sequence query and the matching logic.
     * 
+    * @param root
+    * 		 The node to start searching from.
     * @param query
     *        The query sequence.
     * @param match

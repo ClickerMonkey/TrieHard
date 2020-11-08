@@ -33,6 +33,9 @@ public class TrieSequencerShortArray implements TrieSequencer<short[]>
 	*/
    private static final long serialVersionUID = 1L;
 	
+   /**
+    * Only a single instance is needed of this sequencer.
+    */
    public static final TrieSequencerShortArray INSTANCE = new TrieSequencerShortArray();
 
    @Override
@@ -61,6 +64,11 @@ public class TrieSequencerShortArray implements TrieSequencer<short[]>
       return sequence[i];
    }
    
+   /**
+    * When deserialized, just return the single instance.
+    * 
+    * @return {@link #INSTANCE}
+    */
    protected Object readResolve()
    {
 	   return INSTANCE;

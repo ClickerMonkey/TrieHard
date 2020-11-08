@@ -33,6 +33,9 @@ public class TrieSequencerByteArray implements TrieSequencer<byte[]>
 	*/
    private static final long serialVersionUID = 1L;
 	
+   /**
+    * Only a single instance is needed of this sequencer.
+    */
    public static final TrieSequencerByteArray INSTANCE = new TrieSequencerByteArray();
 
    @Override
@@ -61,6 +64,11 @@ public class TrieSequencerByteArray implements TrieSequencer<byte[]>
       return sequence[i];
    }
    
+   /**
+    * When deserialized, just return the single instance.
+    * 
+    * @return {@link #INSTANCE}
+    */
    protected Object readResolve()
    {
 	   return INSTANCE;

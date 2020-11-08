@@ -52,11 +52,15 @@ public class TrieSet<E> implements Set<E>, Serializable
     */
    public static final Object FLAG_NONE = null;
 
+   /**
+    * The Trie of this set.
+    */
    protected Trie<E, Object> trie;
 
    /**
-    * Instantiates a TrieSet given a trie. 
-    * <h3>Example Usage</h3>
+    * Instantiates a TrieSet given a trie.<br>
+    * <br>
+    * <strong>Example Usage</strong>
     * <pre>
     * TrieSet&lt;String&gt; set = new TrieSet&lt;String&gt;( Tries.forStrings() );
     * </pre>

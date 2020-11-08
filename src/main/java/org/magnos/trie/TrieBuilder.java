@@ -40,15 +40,37 @@ import java.util.function.Supplier;
 public class TrieBuilder<S, T, C extends Collection<T>> 
 {
 	
+	/**
+	 * The current sequencer of the builder.
+	 */
 	protected TrieSequencer<S> sequencer;
+	
+	/**
+	 * The current default match of the builder.
+	 */
 	protected TrieMatch match;
+	
+	/**
+	 * The current collection supplier of the builder.
+	 */
 	protected Supplier<C> supplier;
+	
+	/**
+	 * The current flag as to whether the built TrieCollection should return 
+	 * empty collections when a collection is not found at a given sequence.
+	 */
 	protected boolean defaultEmptyCollection;
+	
+	/**
+	 * The current default value to return when a value is not found at a given sequence.
+	 */
 	protected T defaultValue;
+	
 
 	/**
 	 * Creates a new builder for an implied value type.
 	 * 
+	 * @param <T> The value type.
 	 * @return
 	 * 		The reference to a new builder instance.
 	 */
@@ -62,6 +84,7 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * 
 	 * @param clazz
 	 * 		The class of the value type.
+	 * @param <T> The value type.
 	 * @return
 	 * 		The reference to a new builder instance.
 	 */
@@ -98,6 +121,7 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except for an 
 	 * implicit sequence of characters.
 	 * 
+	 * @param <CS> The CharSequence type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -112,6 +136,7 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * 
 	 * @param clazz
 	 * 		The class of the character sequence.
+	 * @param <CS> The CharSequence type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -124,6 +149,7 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except for an 
 	 * implicit sequence of case-insensitive characters.
 	 * 
+	 * @param <CS> The CharSequence type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -138,6 +164,7 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * 
 	 * @param clazz
 	 * 		The class of the character sequence.
+	 * @param <CS> The CharSequence type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -258,6 +285,10 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except with a 
 	 * sequencer of the given type.
 	 * 
+	 * @param sequencer
+	 * 		The implementation which interprets sequences.
+	 * @param <NS> The new sequence type.
+	 * @param <NQ> The sequencer type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -270,6 +301,9 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except for a new type
 	 * and a collection type of ArrayList.
 	 * 
+	 * @param clazz
+	 * 		The class of the value type.
+	 * @param <V> The value type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -282,10 +316,12 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except for a new 
 	 * default match.
 	 * 
+	 * @param match
+	 * 		The default match.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
-	public TrieBuilder<S, T, C> withMatch(TrieMatch match)
+	public TrieBuilder<S, T, C> withMatch( TrieMatch match )
 	{
 		return new TrieBuilder<S, T, C>( sequencer, match, supplier, defaultValue, defaultEmptyCollection );
 	}
@@ -294,6 +330,9 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except with a new 
 	 * collection supplier for TrieCollections.
 	 * 
+	 * @param supplier
+	 * 		The collection supplier.
+	 * @param <NC> The new collection type.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
@@ -366,10 +405,12 @@ public class TrieBuilder<S, T, C extends Collection<T>>
 	 * Creates a new builder with the current properties except with the 
 	 * given default value when a query finds no match.
 	 * 
+	 * @param defaultValue
+	 * 		The default value for the builder.
 	 * @return
 	 * 		The reference to the new builder.
 	 */
-	public TrieBuilder<S, T, C> withDefaultValue(T defaultValue)
+	public TrieBuilder<S, T, C> withDefaultValue( T defaultValue )
 	{
 		return new TrieBuilder<S, T, C>( sequencer, match, supplier, defaultValue, defaultEmptyCollection );
 	}

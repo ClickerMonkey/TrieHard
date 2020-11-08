@@ -30,7 +30,8 @@ public final class Tries
 
    /**
     * Creates a Trie where the keys are case-sensitive Strings.
-    * 
+    *
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<String, T> forStrings()
@@ -43,8 +44,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<String, T> forStrings( T defaultValue )
@@ -55,6 +57,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are case-insensitive Strings.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<String, T> forInsensitiveStrings()
@@ -67,8 +70,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<String, T> forInsensitiveStrings( T defaultValue )
@@ -79,6 +83,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are case-sensitive character arrays.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<char[], T> forChars()
@@ -91,8 +96,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<char[], T> forChars( T defaultValue )
@@ -103,6 +109,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are case-insensitive character arrays.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<char[], T> forInsensitiveChars()
@@ -115,8 +122,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<char[], T> forInsensitiveChars( T defaultValue )
@@ -127,6 +135,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are bytes.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<byte[], T> forBytes()
@@ -139,8 +148,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<byte[], T> forBytes( T defaultValue )
@@ -151,6 +161,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are shorts.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<short[], T> forShorts()
@@ -163,8 +174,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<short[], T> forShorts( T defaultValue )
@@ -175,6 +187,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are integers.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<int[], T> forInts()
@@ -187,8 +200,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<int[], T> forInts( T defaultValue )
@@ -199,6 +213,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are longs.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<long[], T> forLongs()
@@ -211,8 +226,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<long[], T> forLongs( T defaultValue )
@@ -223,6 +239,7 @@ public final class Tries
    /**
     * Creates a Trie where the keys are ByteBuffers.
     * 
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<ByteBuffer, T> forByteBuffers()
@@ -235,8 +252,9 @@ public final class Tries
     * 
     * @param defaultValue
     *        The default value of the Trie is the value returned when
-    *        {@link #get(Object)} or {@link #get(Object, TrieMatch)} is called
+    *        {@link Trie#get(Object)} or {@link Trie#get(Object, TrieMatch)} is called
     *        and no match was found.
+    * @param <T> The value type.
     * @return The reference to a newly instantiated Trie.
     */
    public static <T> Trie<ByteBuffer, T> forByteBuffers( T defaultValue )

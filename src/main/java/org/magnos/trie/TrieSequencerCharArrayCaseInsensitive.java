@@ -33,6 +33,9 @@ public class TrieSequencerCharArrayCaseInsensitive extends TrieSequencerCharArra
 	*/
    private static final long serialVersionUID = 1L;
 	
+   /**
+    * Only a single instance is needed of this sequencer.
+    */
    public static final TrieSequencerCharArrayCaseInsensitive INSTANCE = new TrieSequencerCharArrayCaseInsensitive();
 
    @Override
@@ -58,6 +61,11 @@ public class TrieSequencerCharArrayCaseInsensitive extends TrieSequencerCharArra
       return Character.toLowerCase( sequence[i] );
    }
    
+   /**
+    * When deserialized, just return the single instance.
+    * 
+    * @return {@link #INSTANCE}
+    */
    protected Object readResolve()
    {
 	   return INSTANCE;

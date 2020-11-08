@@ -40,8 +40,17 @@ public class TrieCollection<S, T, C extends Collection<T>> extends Trie<S, C>
 	*/
    private static final long serialVersionUID = 1L;
 
+   /**
+    * The supplier of empty collections.
+    */
    protected Supplier<C> supplier;
+   
+   /**
+    * If the default value (the value returned when a search yields no results)
+    * should return an empty collection.
+    */
    protected boolean defaultCollection;
+   
    
    /**
     * Instantiates a new TrieCollection for deserialization.

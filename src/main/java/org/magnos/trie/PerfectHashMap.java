@@ -40,8 +40,19 @@ public class PerfectHashMap<T> implements Serializable
 	*/
    private static final long serialVersionUID = 1L;
 
+   /**
+    * The smallest key in the map.
+    */
    private int min;
+   
+   /**
+    * The difference between the largest key and the smallest key.
+    */
    private int size;
+   
+   /**
+    * The values in this map.
+    */
    private T[] values;
 
    /**

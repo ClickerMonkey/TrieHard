@@ -454,6 +454,20 @@ public class TestTrie
       
       assertEquals( expected, printed.toString() );
    }
+   
+   @Test
+   public void testUpdate()
+   {
+	   Trie<String, Integer> t = Tries.forStrings();
+	   
+	   t.put( "x", 0 );
+	   t.put( "x", (x) -> x + 1 );
+	   t.put( "y", (y) -> y * 2, 1 );
+	   t.put( "y", (y) -> y * 2, 1 );
+	   
+	   assertEquals( 1, t.get( "x" ) );
+	   assertEquals( 4, t.get( "y" ) );
+   }
 
    public static <T> StringBuilder print( Trie<String, T> trie )
    {
